@@ -229,12 +229,19 @@
         // State Management
         let travelData = [];
         let ai = null;
-        try {
-            if (process.env.api_key) {
-                ai = new GoogleGenAI({ apiKey: process.env.api_key });
+        
+        // Debug: Check if API key is present (masked)
+        const apiKey = process.env.api_key;
+        if (apiKey) {
+            console.log("API Key detected, length:", apiKey.length);
+            try {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+                console.log("AI Client initialized successfully.");
+            } catch (e) {
+                console.error("AI Initialization failed:", e);
             }
-        } catch (e) {
-            console.error("AI Initialization failed:", e);
+        } else {
+            console.warn("API Key (api_key) not found in environment variables.");
         }
 
         // Initial Load
