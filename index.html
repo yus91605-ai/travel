@@ -212,18 +212,7 @@
     <script type="module">
         import { GoogleGenAI, Type } from "https://esm.run/@google/genai";
 
-        // Initialize Lucide Icons
-        lucide.createIcons();
-
-        // State Management
-        let travelData = [];
-        const ai = new GoogleGenAI({ apiKey: process.env.api_key });
-
-        // Initial Load
-        window.onload = () => {
-            loadData();
-        };
-
+        // Export functions to window immediately for inline event handlers
         window.showLoading = showLoading;
         window.loadData = loadData;
         window.handleSubmit = handleSubmit;
@@ -233,6 +222,25 @@
         window.adoptSuggestion = adoptSuggestion;
         window.showItinerary = showItinerary;
         window.closeModal = closeModal;
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // State Management
+        let travelData = [];
+        let ai = null;
+        try {
+            if (process.env.api_key) {
+                ai = new GoogleGenAI({ apiKey: process.env.api_key });
+            }
+        } catch (e) {
+            console.error("AI Initialization failed:", e);
+        }
+
+        // Initial Load
+        window.onload = () => {
+            loadData();
+        };
 
         function showItinerary(title, content) {
             document.getElementById('modalTitle').innerText = title + ' - 詳細行程';
@@ -342,6 +350,10 @@
         }
 
         async function generateAISuggestion() {
+            if (!ai) {
+                showToast('AI 尚未初始化，請檢查 API Key 設定。', 'alert-circle');
+                return;
+            }
             const city = document.getElementById('cityInput').value;
             const date = document.getElementById('dateInput').value;
             const days = document.getElementById('daysInput').value;
