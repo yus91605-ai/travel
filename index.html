@@ -266,13 +266,17 @@
 
         function loadData() {
             showLoading(true);
-            google.script.run
-                .withSuccessHandler(data => {
+            fetch('/api/travel')
+                .then(res => res.json())
+                .then(data => {
                     travelData = data;
                     renderList();
                     showLoading(false);
                 })
-                .getTravelData();
+                .catch(err => {
+                    console.error('讀取失敗:', err);
+                    showLoading(false);
+                });
         }
 
         function renderList() {
@@ -300,7 +304,7 @@
                 card.innerHTML = `
                     <div class="flex items-start gap-4">
                         <div class="mt-1">
-                            <button onclick="toggleStatus(${item.rowNumber}, '${item['狀態']}')" 
+                            <button onclick="toggleStatus('${item.ID}', '${item['狀態']}')" 
                                     class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isDone ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-sky-500'}">
                                 ${isDone ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
                             </button>
@@ -327,7 +331,7 @@
                                 class="p-2 text-sky-600 hover:bg-sky-50 rounded-xl transition-all flex items-center gap-1 text-sm font-bold">
                             <i data-lucide="eye" class="w-5 h-5"></i> 查看行程
                         </button>` : ''}
-                        <button onclick="deleteItem(${item.rowNumber})" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                        <button onclick="deleteItem('${item.ID}')" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
                             <i data-lucide="trash-2" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -448,49 +452,67 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="loader w-5 h-5 border-2 border-white border-t-transparent rounded-full"></i> 處理中...';
 
-            google.script.run
-                .withSuccessHandler(res => {
-                    if (res.success) {
-                        showToast('行程已成功建立！');
-                        document.getElementById('cityInput').value = '';
-                        document.getElementById('dateInput').value = '';
-                        document.getElementById('daysInput').value = '';
-                        document.getElementById('spotsInput').value = '';
-                        document.getElementById('budgetInput').value = '';
-                        document.getElementById('weatherInput').value = '';
-                        document.getElementById('itineraryInput').value = '';
-                        document.getElementById('aiResult').classList.add('hidden');
-                        loadData();
-                    }
-                    btn.disabled = false;
-                    btn.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5"></i> 建立行程';
-                    lucide.createIcons();
-                })
-                .addTravelItem({ city, date, days, spots, budget, weather, itinerary });
+            fetch('/api/travel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ city, date, days, spots, budget, weather, itinerary })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    showToast('行程已成功建立！');
+                    document.getElementById('cityInput').value = '';
+                    document.getElementById('dateInput').value = '';
+                    document.getElementById('daysInput').value = '';
+                    document.getElementById('spotsInput').value = '';
+                    document.getElementById('budgetInput').value = '';
+                    document.getElementById('weatherInput').value = '';
+                    document.getElementById('itineraryInput').value = '';
+                    document.getElementById('aiResult').classList.add('hidden');
+                    loadData();
+                }
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5"></i> 建立行程';
+                lucide.createIcons();
+            })
+            .catch(err => {
+                console.error('建立失敗:', err);
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5"></i> 建立行程';
+                lucide.createIcons();
+            });
         }
 
-        function toggleStatus(row, current) {
-            google.script.run
-                .withSuccessHandler(res => {
-                    if (res.success) {
-                        showToast(`狀態已更新為 ${res.newStatus}`);
-                        loadData();
-                    }
-                })
-                .toggleTravelStatus(row, current);
+        function toggleStatus(id, current) {
+            fetch(`/api/travel/${id}/toggle`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentStatus: current })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    showToast(`狀態已更新為 ${res.newStatus}`);
+                    loadData();
+                }
+            })
+            .catch(err => console.error('更新失敗:', err));
         }
 
-        function deleteItem(row) {
+        function deleteItem(id) {
             if (!confirm('確定要刪除這筆行程嗎？')) return;
             
-            google.script.run
-                .withSuccessHandler(res => {
-                    if (res.success) {
-                        showToast('行程已刪除');
-                        loadData();
-                    }
-                })
-                .deleteTravelItem(row);
+            fetch(`/api/travel/${id}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.success) {
+                    showToast('行程已刪除');
+                    loadData();
+                }
+            })
+            .catch(err => console.error('刪除失敗:', err));
         }
 
         function showToast(msg, icon = 'check-circle') {
