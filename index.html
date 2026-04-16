@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>城市旅遊規劃清單</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8fafc;
+            background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.1) 0, transparent 50%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .item-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .item-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+        .loader {
+            border-top-color: #0ea5e9;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        [v-cloak] { display: none; }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Header / Hero Section -->
+    <header class="relative overflow-hidden bg-sky-600 pt-16 pb-32 text-white">
+        <div class="absolute inset-0 opacity-20">
+            <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white"></path>
+            </svg>
+        </div>
+        <div class="container mx-auto px-4 relative z-10 text-center">
+            <div class="inline-flex items-center justify-center p-3 bg-white/20 rounded-2xl mb-4 backdrop-blur-md">
+                <i data-lucide="map-pin" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-2">城市旅遊規劃</h1>
+            <p class="text-sky-100 text-lg max-w-md mx-auto">記錄每一個想去的角落，規劃下一場完美的冒險。</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 -mt-16 relative z-20">
+        <!-- Input Form Card -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="glass-card rounded-3xl shadow-xl p-6 md:p-8">
+                <div class="space-y-6">
+                    <!-- Row 1: City & AI Button -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <div class="md:col-span-3 space-y-2">
+                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                                <i data-lucide="navigation" class="w-4 h-4"></i> 目的地城市
+                            </label>
+                            <input type="text" id="cityInput" placeholder="例如：東京、巴黎..." 
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
+                        </div>
+                        <div class="md:col-span-1">
+                            <button onclick="generateAISuggestion()" id="aiBtn"
+                                    class="w-full bg-amber-100 hover:bg-amber-200 text-amber-700 px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95">
+                                <i data-lucide="sparkles" class="w-4 h-4"></i> AI 建議行程
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Other Details -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                                <i data-lucide="calendar" class="w-4 h-4"></i> 預計日期
+                            </label>
+                            <input type="date" id="dateInput" 
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4"></i> 停留天數
+                            </label>
+                            <input type="number" id="daysInput" placeholder="天數" min="1"
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                                <i data-lucide="camera" class="w-4 h-4"></i> 想去的景點
+                            </label>
+                            <input type="text" id="spotsInput" placeholder="景點、美食..." 
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                                <i data-lucide="dollar-sign" class="w-4 h-4"></i> 預計預算
+                            </label>
+                            <input type="text" id="budgetInput" placeholder="例如：50,000 TWD" 
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                                <i data-lucide="cloud-sun" class="w-4 h-4"></i> 當地氣候
+                            </label>
+                            <input type="text" id="weatherInput" placeholder="例如：晴朗、15-22度" 
+                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
+                                <i data-lucide="list-ordered" class="w-4 h-4"></i> 詳細行程 (可由 AI 生成)
+                            </label>
+                            <textarea id="itineraryInput" rows="4" placeholder="第一天：... 第二天：..." 
+                                      class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Suggestion Result Area -->
+                <div id="aiResult" class="hidden mt-6 pt-6 border-t border-slate-100">
+                    <div id="aiContent"></div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="handleSubmit()" id="submitBtn"
+                            class="bg-sky-600 hover:bg-sky-700 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-sky-200 transition-all active:scale-95">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i> 建立行程
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- List Section -->
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    我的清單 <span id="countBadge" class="text-sm bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">0</span>
+                </h2>
+                <button onclick="loadData()" class="text-sky-600 hover:text-sky-700 flex items-center gap-1 text-sm font-medium">
+                    <i data-lucide="refresh-cw" class="w-4 h-4" id="refreshIcon"></i> 重新整理
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="hidden py-20 text-center">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 mx-auto"></div>
+                <p class="text-slate-500 font-medium">正在同步雲端資料...</p>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden py-20 text-center glass-card rounded-3xl border-dashed border-2 border-slate-300">
+                <div class="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="plane" class="w-10 h-10 text-slate-400"></i>
+                </div>
+                <h3 class="text-xl font-bold text-slate-700 mb-2">還沒有任何計畫</h3>
+                <p class="text-slate-500">開始規劃你的第一場旅行吧！</p>
+            </div>
+
+            <!-- Item List -->
+            <div id="travelList" class="grid grid-cols-1 gap-4">
+                <!-- Cards will be injected here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+            <span id="toastMsg">操作成功</span>
+        </div>
+    </div>
+
+    <!-- Itinerary Modal -->
+    <div id="itineraryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-white/50">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="map" class="w-6 h-6 text-sky-600"></i> <span id="modalTitle">詳細行程</span>
+                </h3>
+                <button onclick="closeModal()" class="p-2 hover:bg-slate-100 rounded-full transition-all">
+                    <i data-lucide="x" class="w-6 h-6 text-slate-400"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto bg-white/30">
+                <div id="modalContent" class="prose prose-slate max-w-none text-slate-700 whitespace-pre-line">
+                    <!-- Content will be injected here -->
+                </div>
+            </div>
+            <div class="p-4 border-t border-slate-100 bg-white/50 flex justify-end">
+                <button onclick="closeModal()" class="px-6 py-2 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 transition-all">
+                    關閉
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { GoogleGenAI, Type } from "https://esm.run/@google/genai";
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // State Management
+        let travelData = [];
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+        // Initial Load
+        window.onload = () => {
+            loadData();
+        };
+
+        window.showLoading = showLoading;
+        window.loadData = loadData;
+        window.handleSubmit = handleSubmit;
+        window.toggleStatus = toggleStatus;
+        window.deleteItem = deleteItem;
+        window.generateAISuggestion = generateAISuggestion;
+        window.adoptSuggestion = adoptSuggestion;
+        window.showItinerary = showItinerary;
+        window.closeModal = closeModal;
+
+        function showItinerary(title, content) {
+            document.getElementById('modalTitle').innerText = title + ' - 詳細行程';
+            document.getElementById('modalContent').innerText = content || '尚未規劃詳細行程。';
+            document.getElementById('itineraryModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('itineraryModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function showLoading(isLoading) {
+            const loading = document.getElementById('loadingState');
+            const list = document.getElementById('travelList');
+            const empty = document.getElementById('emptyState');
+            const refreshIcon = document.getElementById('refreshIcon');
+
+            if (isLoading) {
+                loading.classList.remove('hidden');
+                list.classList.add('hidden');
+                empty.classList.add('hidden');
+                refreshIcon.classList.add('animate-spin');
+            } else {
+                loading.classList.add('hidden');
+                refreshIcon.classList.remove('animate-spin');
+            }
+        }
+
+        function loadData() {
+            showLoading(true);
+            google.script.run
+                .withSuccessHandler(data => {
+                    travelData = data;
+                    renderList();
+                    showLoading(false);
+                })
+                .getTravelData();
+        }
+
+        function renderList() {
+            const listContainer = document.getElementById('travelList');
+            const emptyState = document.getElementById('emptyState');
+            const countBadge = document.getElementById('countBadge');
+            
+            countBadge.innerText = travelData.length;
+            listContainer.innerHTML = '';
+
+            if (travelData.length === 0) {
+                listContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            listContainer.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            travelData.forEach(item => {
+                const isDone = item['狀態'] === '已完成';
+                const card = document.createElement('div');
+                card.className = `item-card glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 ${isDone ? 'opacity-75' : ''}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="mt-1">
+                            <button onclick="toggleStatus(${item.rowNumber}, '${item['狀態']}')" 
+                                    class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isDone ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-sky-500'}">
+                                ${isDone ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
+                            </button>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h3 class="text-xl font-bold ${isDone ? 'text-slate-400 line-through' : 'text-slate-800'}">${item['城市']}</h3>
+                                <span class="text-xs px-2 py-0.5 rounded-lg font-bold ${isDone ? 'bg-emerald-100 text-emerald-600' : 'bg-sky-100 text-sky-600'}">
+                                    ${item['狀態']}
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap gap-4 text-sm text-slate-500">
+                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-4 h-4"></i> ${item['日期'] || '未定'}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4"></i> ${item['天數'] ? item['天數'] + ' 天' : '天數未定'}</span>
+                                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-4 h-4"></i> ${item['景點'] || '探索中'}</span>
+                                <span class="flex items-center gap-1 font-medium text-amber-600"><i data-lucide="banknote" class="w-4 h-4"></i> ${item['預算'] || '未填寫'}</span>
+                                <span class="flex items-center gap-1 text-sky-500"><i data-lucide="cloud-sun" class="w-4 h-4"></i> ${item['氣候'] || '未知'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-end gap-2">
+                        ${item['行程'] ? `
+                        <button onclick="showItinerary('${item['城市']}', \`${item['行程'].replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`)" 
+                                class="p-2 text-sky-600 hover:bg-sky-50 rounded-xl transition-all flex items-center gap-1 text-sm font-bold">
+                            <i data-lucide="eye" class="w-5 h-5"></i> 查看行程
+                        </button>` : ''}
+                        <button onclick="deleteItem(${item.rowNumber})" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        async function generateAISuggestion() {
+            const city = document.getElementById('cityInput').value;
+            const date = document.getElementById('dateInput').value;
+            const days = document.getElementById('daysInput').value;
+            const aiBtn = document.getElementById('aiBtn');
+            const aiResult = document.getElementById('aiResult');
+            const aiContent = document.getElementById('aiContent');
+
+            if (!city) {
+                showToast('請先輸入城市名稱，AI 才能幫你規劃哦！', 'sparkles');
+                return;
+            }
+
+            aiBtn.disabled = true;
+            aiBtn.innerHTML = '<i class="loader w-4 h-4 border-2 border-white border-t-transparent rounded-full"></i> 規劃中...';
+            aiResult.classList.remove('hidden');
+            aiContent.innerHTML = '<p class="text-slate-500 animate-pulse">正在為您量身打造完整行程與氣候資訊...</p>';
+
+            try {
+                const datePrompt = date ? `在 ${date} 左右` : "在該季節";
+                const daysPrompt = days ? `停留 ${days} 天` : "一趟深度旅遊";
+                const response = await ai.models.generateContent({
+                    model: "gemini-3-flash-preview",
+                    contents: `你是一位專業的旅遊規劃師。請針對城市「${city}」${datePrompt}、${daysPrompt}的旅遊推薦 3-5 個必去景點，並給出一個詳細的「第一天至最後一天」行程安排。行程安排請務必使用條列式呈現（例如：Day 1: \n - 景點A \n - 景點B...），並包含預估預算（以 TWD 為單位）以及當地的氣候狀況。請以繁體中文回答，並以 JSON 格式回傳，格式如下：{"spots": "景點A、景點B...", "itinerary": "Day 1:...\\nDay 2:...", "budget": "預估金額", "weather": "氣候狀況"}`,
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: Type.OBJECT,
+                            properties: {
+                                spots: { type: Type.STRING },
+                                itinerary: { type: Type.STRING },
+                                budget: { type: Type.STRING },
+                                weather: { type: Type.STRING }
+                            },
+                            required: ["spots", "itinerary", "budget", "weather"]
+                        }
+                    }
+                });
+
+                const result = JSON.parse(response.text);
+                aiContent.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div class="bg-sky-50 p-4 rounded-2xl border border-sky-100">
+                                <h4 class="font-bold text-sky-800 mb-1 flex items-center gap-2">
+                                    <i data-lucide="sparkles" class="w-4 h-4"></i> 推薦景點
+                                </h4>
+                                <p class="text-slate-700 text-sm">${result.spots}</p>
+                            </div>
+                            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100">
+                                <h4 class="font-bold text-amber-800 mb-1 flex items-center gap-2">
+                                    <i data-lucide="banknote" class="w-4 h-4"></i> 預估預算
+                                </h4>
+                                <p class="text-slate-700 text-sm">${result.budget}</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                                <h4 class="font-bold text-blue-800 mb-1 flex items-center gap-2">
+                                    <i data-lucide="cloud-sun" class="w-4 h-4"></i> 當地氣候
+                                </h4>
+                                <p class="text-slate-700 text-sm">${result.weather}</p>
+                            </div>
+                        </div>
+                        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
+                            <h4 class="font-bold text-emerald-800 mb-1 flex items-center gap-2">
+                                <i data-lucide="list-ordered" class="w-4 h-4"></i> 完整行程建議
+                            </h4>
+                            <p class="text-slate-700 text-sm whitespace-pre-line">${result.itinerary}</p>
+                        </div>
+                        <button onclick="adoptSuggestion('${result.spots.replace(/'/g, "\\'")}', '${result.budget.replace(/'/g, "\\'")}', '${result.weather.replace(/'/g, "\\'")}', \`${result.itinerary.replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`)" 
+                                class="w-full py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="copy-check" class="w-4 h-4"></i> 採用此完整建議
+                        </button>
+                    </div>
+                `;
+                lucide.createIcons();
+            } catch (error) {
+                console.error(error);
+                aiContent.innerHTML = '<p class="text-red-500">抱歉，AI 規劃時遇到一點問題，請再試一次。</p>';
+            } finally {
+                aiBtn.disabled = false;
+                aiBtn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i> AI 建議行程';
+                lucide.createIcons();
+            }
+        }
+
+        function adoptSuggestion(spots, budget, weather, itinerary) {
+            document.getElementById('spotsInput').value = spots;
+            if (budget) document.getElementById('budgetInput').value = budget;
+            if (weather) document.getElementById('weatherInput').value = weather;
+            if (itinerary) document.getElementById('itineraryInput').value = itinerary;
+            showToast('已採用 AI 推薦建議！', 'sparkles');
+        }
+
+        function handleSubmit() {
+            const city = document.getElementById('cityInput').value;
+            const date = document.getElementById('dateInput').value;
+            const days = document.getElementById('daysInput').value;
+            const spots = document.getElementById('spotsInput').value;
+            const budget = document.getElementById('budgetInput').value;
+            const weather = document.getElementById('weatherInput').value;
+            const itinerary = document.getElementById('itineraryInput').value;
+            const btn = document.getElementById('submitBtn');
+
+            if (!city) {
+                showToast('請輸入目的地城市', 'alert-circle');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="loader w-5 h-5 border-2 border-white border-t-transparent rounded-full"></i> 處理中...';
+
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (res.success) {
+                        showToast('行程已成功建立！');
+                        document.getElementById('cityInput').value = '';
+                        document.getElementById('dateInput').value = '';
+                        document.getElementById('daysInput').value = '';
+                        document.getElementById('spotsInput').value = '';
+                        document.getElementById('budgetInput').value = '';
+                        document.getElementById('weatherInput').value = '';
+                        document.getElementById('itineraryInput').value = '';
+                        document.getElementById('aiResult').classList.add('hidden');
+                        loadData();
+                    }
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="plus-circle" class="w-5 h-5"></i> 建立行程';
+                    lucide.createIcons();
+                })
+                .addTravelItem({ city, date, days, spots, budget, weather, itinerary });
+        }
+
+        function toggleStatus(row, current) {
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (res.success) {
+                        showToast(`狀態已更新為 ${res.newStatus}`);
+                        loadData();
+                    }
+                })
+                .toggleTravelStatus(row, current);
+        }
+
+        function deleteItem(row) {
+            if (!confirm('確定要刪除這筆行程嗎？')) return;
+            
+            google.script.run
+                .withSuccessHandler(res => {
+                    if (res.success) {
+                        showToast('行程已刪除');
+                        loadData();
+                    }
+                })
+                .deleteTravelItem(row);
+        }
+
+        function showToast(msg, icon = 'check-circle') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            toastMsg.innerText = msg;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
