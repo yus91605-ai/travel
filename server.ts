@@ -36,15 +36,18 @@ async function startServer() {
   const apiRouter = express.Router();
 
   apiRouter.get('/travel', (req, res) => {
+    console.log(`[Server] Handling GET /api/travel`);
     try {
       const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
       res.json(data);
     } catch (e) {
+      console.error(`[Server] Error reading data:`, e);
       res.status(500).json({ success: false, error: 'Failed to read data' });
     }
   });
 
   apiRouter.post('/travel', (req, res) => {
+    console.log(`[Server] Handling POST /api/travel`, req.body);
     try {
       const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
       const newItem = {

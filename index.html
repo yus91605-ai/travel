@@ -218,9 +218,15 @@
         
         // Initialize AI
         try {
-            const apiKey = process.env.GEMINI_API_KEY || '';
-            if (apiKey) {
+            // Using a safer way to check for process or fallback to a Vite define
+            const apiKey = (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) 
+                ? process.env.GEMINI_API_KEY 
+                : "__GEMINI_API_KEY__"; // Vite replacement target
+
+            if (apiKey && apiKey !== "__GEMINI_API_KEY__") {
                 ai = new GoogleGenAI({ apiKey: apiKey });
+            } else {
+                console.warn("API Key not found or fallback active.");
             }
         } catch (e) {
             console.error("AI Initialization Error:", e);
@@ -258,8 +264,21 @@
 
         function loadData() {
             showLoading(true);
-            fetch('/api/travel')
-                .then(res => res.json())
+            const apiUrl = '/api/travel';
+            console.log(`[Debug] Checking origin: ${window.location.origin}`);
+            console.log(`[Debug] Fetching data from: ${apiUrl}`);
+            
+            fetch(apiUrl)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    const contentType = res.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                        throw new TypeError("Oops, we haven't got JSON!");
+                    }
+                    return res.json();
+                })
                 .then(data => {
                     travelData = data;
                     renderList();
