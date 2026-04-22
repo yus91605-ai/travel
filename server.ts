@@ -4,36 +4,14 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI } from "@google/genai";
+import * as GoogleGenAIModule from "@google/genai";
+
+const GoogleGenAI = GoogleGenAIModule.GoogleGenAI;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DATA_FILE = path.join(__dirname, 'data.json');
-
-// Initialize AI Client lazily
-let aiClient: GoogleGenAI | null = null;
-function getAIClient() {
-  if (!aiClient) {
-    const rawKey = process.env.api_key || process.env.GEMINI_API_KEY;
-    if (!rawKey) {
-      throw new Error('未偵測到 API Key。請在 Settings -> Secrets 中設定名稱為 "api_key" 的密鑰。');
-    }
-    
-    // 清除可能存在的引號或空格
-    const apiKey = rawKey.trim().replace(/^["']|["']$/g, '');
-    
-    if (apiKey.length < 20) {
-      throw new Error('偵測到的 API Key 長度異常，請確認是否填寫正確。');
-    }
-
-    console.log(`[AI] 初始化中... (Key 長度: ${apiKey.length})`);
-    
-    // 正確的初始化方式應傳入物件
-    aiClient = new GoogleGenAI({ apiKey: apiKey });
-  }
-  return aiClient;
-}
 
 // Initialize data file if it doesn't exist
 if (!fs.existsSync(DATA_FILE)) {
@@ -44,28 +22,29 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // IMPORTANT: Body parser must be before routes
   app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
-  // Request logging
-  app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
-    next();
-  });
+  console.log('[Server] Starting initialization...');
 
-  // Health check
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok', time: new Date().toISOString() });
-  });
-
-  // API Routes - Explicitly handle both with and without trailing slash
+  // API Router
   const apiRouter = express.Router();
 
   // AI Suggestion Route
   apiRouter.post('/ai/suggest', async (req, res) => {
+    console.log('[Server] AI Suggestion Request received for:', req.body.city);
     try {
       const { city, date, days } = req.body;
-      const ai = getAIClient();
       
+      const rawKey = process.env.api_key || process.env.GEMINI_API_KEY;
+      if (!rawKey) {
+        return res.status(401).json({ success: false, error: '未偵測到 API Key，請檢查 Secrets 設定。' });
+      }
+      
+      const apiKey = rawKey.trim().replace(/^["']|["']$/g, '');
+      const ai = new GoogleGenAI({ apiKey });
+
       const datePrompt = date ? `在 ${date} 左右` : "在該季節";
       const daysPrompt = days ? `停留 ${days} 天` : "一趟深度旅遊";
 
@@ -79,34 +58,25 @@ async function startServer() {
         }
       });
 
-      const text = response.text;
-      if (!text) {
-          throw new Error('AI 回傳內容為空');
-      }
-      
-      res.json(JSON.parse(text));
+      console.log('[Server] AI Generation successful');
+      res.json(JSON.parse(response.text || '{}'));
     } catch (e: any) {
-      console.error('[AI Error]', e);
-      res.status(500).json({ 
-        success: false, 
-        error: e.message || 'AI 規劃失敗' 
-      });
+      console.error('[Server] AI Route Error:', e);
+      res.status(500).json({ success: false, error: e.message || 'AI 規劃發生內部錯誤' });
     }
   });
 
   apiRouter.get('/travel', (req, res) => {
-    console.log(`[Server] Handling GET /api/travel`);
+    console.log('[Server] GET /api/travel');
     try {
       const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
       res.json(data);
     } catch (e) {
-      console.error(`[Server] Error reading data:`, e);
-      res.status(500).json({ success: false, error: 'Failed to read data' });
+      res.status(500).json({ success: false, error: '讀取資料失敗' });
     }
   });
 
   apiRouter.post('/travel', (req, res) => {
-    console.log(`[Server] Handling POST /api/travel`, req.body);
     try {
       const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
       const newItem = {
@@ -119,7 +89,7 @@ async function startServer() {
       fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ success: false, error: 'Failed to save data' });
+      res.status(500).json({ success: false, error: '儲存資料失敗' });
     }
   });
 
@@ -136,10 +106,10 @@ async function startServer() {
         fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
         res.json({ success: true, newStatus });
       } else {
-        res.status(404).json({ success: false, error: 'Item not found' });
+        res.status(404).json({ success: false, error: '找不到該項目' });
       }
     } catch (e) {
-      res.status(500).json({ success: false, error: 'Failed to update data' });
+      res.status(500).json({ success: false, error: '更新失敗' });
     }
   });
 
@@ -154,21 +124,17 @@ async function startServer() {
         fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
         res.json({ success: true });
       } else {
-        res.status(404).json({ success: false, error: 'Item not found' });
+        res.status(404).json({ success: false, error: '找不到該項目' });
       }
     } catch (e) {
-      res.status(500).json({ success: false, error: 'Failed to delete data' });
+      res.status(500).json({ success: false, error: '刪除失敗' });
     }
   });
 
+  // Register API Router
   app.use('/api', apiRouter);
 
-  // Fallback for missing API routes - return JSON instead of HTML
-  app.use('/api/*', (req, res) => {
-    res.status(404).json({ success: false, error: 'API route not found' });
-  });
-
-  // Vite middleware for development
+  // Vite or Static files middleware
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -178,14 +144,15 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
+    app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`[Server] Running at http://0.0.0.0:${PORT}`);
   });
 }
 
-startServer();
+startServer().catch(err => {
+  console.error('[Server] Critical start error:', err);
+});
+
