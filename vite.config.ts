@@ -8,7 +8,8 @@ export default defineConfig(({mode}) => {
   return {
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env.api_key': JSON.stringify(env.api_key),
+      'process.env.api_key': JSON.stringify(env.api_key || ''),
+      'import.meta.env.VITE_API_KEY': JSON.stringify(env.api_key || ''),
     },
     resolve: {
       alias: {

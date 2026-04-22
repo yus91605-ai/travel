@@ -231,7 +231,18 @@
         let ai = null;
         
         // Debug: Check if API key is present (masked)
-        const apiKey = process.env.api_key;
+        // Use a safer way that won't crash if process is missing or define replacement fails
+        let apiKey = '';
+        try {
+            apiKey = process.env.api_key || '';
+        } catch (e) {}
+        
+        if (!apiKey) {
+            try {
+                apiKey = import.meta.env.VITE_API_KEY || '';
+            } catch (e) {}
+        }
+
         if (apiKey) {
             console.log("API Key detected, length:", apiKey.length);
             try {
