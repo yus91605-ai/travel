@@ -218,15 +218,14 @@
         
         // Initialize AI
         try {
-            // Using a safer way to check for process or fallback to a Vite define
-            const apiKey = (typeof process !== 'undefined' && process.env && process.env.GEMINI_API_KEY) 
-                ? process.env.GEMINI_API_KEY 
-                : "__GEMINI_API_KEY__"; // Vite replacement target
+            // Rely on direct string replacement by Vite define
+            const apiKey = "__GEMINI_API_KEY__";
 
-            if (apiKey && apiKey !== "__GEMINI_API_KEY__") {
+            if (apiKey && apiKey !== "__GEMINI_API_KEY__" && apiKey !== "") {
                 ai = new GoogleGenAI({ apiKey: apiKey });
+                console.log("AI Client successfully initialized.");
             } else {
-                console.warn("API Key not found or fallback active.");
+                console.warn("AI Client warning: API Key is empty or not injected. Please check your Secrets settings.");
             }
         } catch (e) {
             console.error("AI Initialization Error:", e);
