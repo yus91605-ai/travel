@@ -212,28 +212,19 @@
     <script type="module">
         import { GoogleGenAI, Type } from "https://esm.run/@google/genai";
 
-        // Export functions to window immediately for inline event handlers
-        window.showLoading = showLoading;
-        window.loadData = loadData;
-        window.handleSubmit = handleSubmit;
-        window.toggleStatus = toggleStatus;
-        window.deleteItem = deleteItem;
-        window.generateAISuggestion = generateAISuggestion;
-        window.adoptSuggestion = adoptSuggestion;
-        window.showItinerary = showItinerary;
-        window.closeModal = closeModal;
-
-        // Initialize Lucide Icons
-        lucide.createIcons();
-
         // State Management
         let travelData = [];
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-        // Initial Load
-        window.onload = () => {
-            loadData();
-        };
+        let ai = null;
+        
+        // Initialize AI
+        try {
+            const apiKey = process.env.GEMINI_API_KEY || '';
+            if (apiKey) {
+                ai = new GoogleGenAI({ apiKey: apiKey });
+            }
+        } catch (e) {
+            console.error("AI Initialization Error:", e);
+        }
 
         function showItinerary(title, content) {
             document.getElementById('modalTitle').innerText = title + ' - 詳細行程';
@@ -343,6 +334,10 @@
         }
 
         async function generateAISuggestion() {
+            if (!ai) {
+                showToast('AI 尚未初始化，請檢查 API Key 設定。', 'alert-circle');
+                return;
+            }
             const city = document.getElementById('cityInput').value;
             const date = document.getElementById('dateInput').value;
             const days = document.getElementById('daysInput').value;
@@ -533,6 +528,17 @@
                 toast.classList.remove('translate-y-0', 'opacity-100');
             }, 3000);
         }
+
+        // Export functions to window for UI events
+        Object.assign(window, {
+            showLoading, loadData, handleSubmit, toggleStatus, 
+            deleteItem, generateAISuggestion, adoptSuggestion, 
+            showItinerary, closeModal
+        });
+
+        // Initialize UI
+        lucide.createIcons();
+        loadData();
     </script>
 </body>
 </html>
