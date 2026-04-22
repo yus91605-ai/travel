@@ -210,27 +210,9 @@
     </div>
 
     <script type="module">
-        import { GoogleGenAI, Type } from "https://esm.run/@google/genai";
-
         // State Management
         let travelData = [];
-        let ai = null;
         
-        // Initialize AI
-        try {
-            // Rely on direct string replacement by Vite define
-            const apiKey = "__GEMINI_API_KEY__";
-
-            if (apiKey && apiKey !== "__GEMINI_API_KEY__" && apiKey !== "") {
-                ai = new GoogleGenAI({ apiKey: apiKey });
-                console.log("AI Client successfully initialized.");
-            } else {
-                console.warn("AI Client warning: API Key is empty or not injected. Please check your Secrets settings.");
-            }
-        } catch (e) {
-            console.error("AI Initialization Error:", e);
-        }
-
         function showItinerary(title, content) {
             document.getElementById('modalTitle').innerText = title + ' - 詳細行程';
             document.getElementById('modalContent').innerText = content || '尚未規劃詳細行程。';
@@ -352,10 +334,6 @@
         }
 
         async function generateAISuggestion() {
-            if (!ai) {
-                showToast('AI 尚未初始化，請檢查 API Key 設定。', 'alert-circle');
-                return;
-            }
             const city = document.getElementById('cityInput').value;
             const date = document.getElementById('dateInput').value;
             const days = document.getElementById('daysInput').value;
@@ -374,28 +352,18 @@
             aiContent.innerHTML = '<p class="text-slate-500 animate-pulse">正在為您量身打造完整行程與氣候資訊...</p>';
 
             try {
-                const datePrompt = date ? `在 ${date} 左右` : "在該季節";
-                const daysPrompt = days ? `停留 ${days} 天` : "一趟深度旅遊";
-
-                const response = await ai.models.generateContent({
-                    model: "gemini-3-flash-preview",
-                    contents: `你是一位專業的旅遊規劃師。請針對城市「${city}」${datePrompt}、${daysPrompt}的旅遊推薦 3-5 個必去景點，並給出一個詳細的「第一天至最後一天」行程安排。行程安排請務必使用條列式呈現（例如：Day 1: \n - 景點A \n - 景點B...），並包含預估預算（以 TWD 為單位）以及當地的氣候狀況。請以繁體中文回答，並以 JSON 格式回傳，格式如下：{"spots": "景點A、景點B...", "itinerary": "Day 1:...\\nDay 2:...", "budget": "預估金額", "weather": "氣候狀況"}`,
-                    config: {
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: Type.OBJECT,
-                            properties: {
-                                spots: { type: Type.STRING },
-                                itinerary: { type: Type.STRING },
-                                budget: { type: Type.STRING },
-                                weather: { type: Type.STRING }
-                            },
-                            required: ["spots", "itinerary", "budget", "weather"]
-                        }
-                    }
+                const res = await fetch('/api/ai/suggest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ city, date, days })
                 });
 
-                const result = JSON.parse(response.text);
+                const result = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(result.error || '規劃失敗');
+                }
+
                 aiContent.innerHTML = `
                     <div class="space-y-3">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
