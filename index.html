@@ -210,7 +210,7 @@
     </div>
 
     <script type="module">
-        import { GoogleGenAI, Type } from "https://esm.run/@google/genai";
+        import { GoogleGenAI, Type } from "@google/genai";
 
         // Export functions to window immediately for inline event handlers
         window.showLoading = showLoading;
@@ -228,32 +228,7 @@
 
         // State Management
         let travelData = [];
-        let ai = null;
-        
-        // Debug: Check if API key is present (masked)
-        // Use a safer way that won't crash if process is missing or define replacement fails
-        let apiKey = '';
-        try {
-            apiKey = process.env.api_key || '';
-        } catch (e) {}
-        
-        if (!apiKey) {
-            try {
-                apiKey = import.meta.env.VITE_API_KEY || '';
-            } catch (e) {}
-        }
-
-        if (apiKey) {
-            console.log("API Key detected, length:", apiKey.length);
-            try {
-                ai = new GoogleGenAI({ apiKey: apiKey });
-                console.log("AI Client initialized successfully.");
-            } catch (e) {
-                console.error("AI Initialization failed:", e);
-            }
-        } else {
-            console.warn("API Key (api_key) not found in environment variables.");
-        }
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
         // Initial Load
         window.onload = () => {
@@ -368,10 +343,6 @@
         }
 
         async function generateAISuggestion() {
-            if (!ai) {
-                showToast('AI 尚未初始化，請檢查 API Key 設定。', 'alert-circle');
-                return;
-            }
             const city = document.getElementById('cityInput').value;
             const date = document.getElementById('dateInput').value;
             const days = document.getElementById('daysInput').value;
@@ -392,6 +363,7 @@
             try {
                 const datePrompt = date ? `在 ${date} 左右` : "在該季節";
                 const daysPrompt = days ? `停留 ${days} 天` : "一趟深度旅遊";
+
                 const response = await ai.models.generateContent({
                     model: "gemini-3-flash-preview",
                     contents: `你是一位專業的旅遊規劃師。請針對城市「${city}」${datePrompt}、${daysPrompt}的旅遊推薦 3-5 個必去景點，並給出一個詳細的「第一天至最後一天」行程安排。行程安排請務必使用條列式呈現（例如：Day 1: \n - 景點A \n - 景點B...），並包含預估預算（以 TWD 為單位）以及當地的氣候狀況。請以繁體中文回答，並以 JSON 格式回傳，格式如下：{"spots": "景點A、景點B...", "itinerary": "Day 1:...\\nDay 2:...", "budget": "預估金額", "weather": "氣候狀況"}`,
@@ -448,7 +420,10 @@
                 lucide.createIcons();
             } catch (error) {
                 console.error(error);
-                aiContent.innerHTML = '<p class="text-red-500">抱歉，AI 規劃時遇到一點問題，請再試一次。</p>';
+                aiContent.innerHTML = `<p class="text-red-500 font-medium p-4 bg-red-50 rounded-xl border border-red-100 flex items-center gap-2">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i> 規劃失敗：${error.message || '請稍後再試'}
+                </p>`;
+                lucide.createIcons();
             } finally {
                 aiBtn.disabled = false;
                 aiBtn.innerHTML = '<i data-lucide="sparkles" class="w-4 h-4"></i> AI 建議行程';
