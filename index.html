@@ -210,6 +210,17 @@
     </div>
 
     <script type="module">
+        // Environment Check
+        if (window.location.hostname.includes('github.io')) {
+            setTimeout(() => {
+                const notice = document.createElement('div');
+                notice.className = 'fixed top-0 left-0 w-full bg-red-600 text-white p-4 text-center z-[100] shadow-xl font-bold';
+                notice.innerHTML = `⚠️ 您目前正在 GitHub Pages 靜態環境，此環境不支援後端與 AI 功能。<br>
+                    請點擊右方 AI Studio 的 "Development App URL" 來開啟具備後端功能的完整版本。`;
+                document.body.prepend(notice);
+            }, 1000);
+        }
+
         // State Management
         let travelData = [];
         
