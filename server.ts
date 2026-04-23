@@ -4,9 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import * as GoogleGenAIModule from "@google/genai";
-
-const GoogleGenAI = GoogleGenAIModule.GoogleGenAI;
+import { GoogleGenAI } from "@google/genai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +28,11 @@ async function startServer() {
 
   // API Router
   const apiRouter = express.Router();
+
+  // Test Route
+  apiRouter.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'API is working' });
+  });
 
   // AI Suggestion Route
   apiRouter.post('/ai/suggest', async (req, res) => {

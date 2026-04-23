@@ -358,6 +358,13 @@
                     body: JSON.stringify({ city, date, days })
                 });
 
+                const contentType = res.headers.get("content-type");
+                if (!contentType || !contentType.includes("application/json")) {
+                    const text = await res.text();
+                    console.error("Non-JSON response received:", text);
+                    throw new Error(`伺服器回傳了錯誤的格式，內容開頭為: ${text.substring(0, 30)}...`);
+                }
+
                 const result = await res.json();
                 
                 if (!res.ok) {
