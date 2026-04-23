@@ -10,10 +10,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DATA_FILE = path.join(__dirname, 'data.json');
+const PACKING_FILE = path.join(__dirname, 'packing.json');
 
-// Initialize data file if it doesn't exist
+// Initialize data files if they don't exist
 if (!fs.existsSync(DATA_FILE)) {
   fs.writeFileSync(DATA_FILE, JSON.stringify([]));
+}
+if (!fs.existsSync(PACKING_FILE)) {
+  fs.writeFileSync(PACKING_FILE, JSON.stringify([
+    { id: '1', text: '護照與證件', checked: false, category: '必備' },
+    { id: '2', text: '充電頭與線材', checked: false, category: '電子' },
+    { id: '3', text: '換洗衣服', checked: false, category: '衣物' }
+  ]));
 }
 
 async function startServer() {
@@ -70,6 +78,32 @@ async function startServer() {
     }
   });
 
+  // AI Packing Suggestion
+  apiRouter.post('/ai/packing', async (req, res) => {
+    try {
+      const { city, weather, days } = req.body;
+      const rawKey = process.env.api_key || process.env.GEMINI_API_KEY;
+      if (!rawKey) return res.status(401).json({ error: 'Missing API Key' });
+      
+      const apiKey = rawKey.trim().replace(/^["']|["']$/g, '');
+      const ai = new GoogleGenAI({ apiKey });
+
+      const prompt = `你是一位旅遊專家。請針對前往「${city}」、天氣「${weather}」、停留「${days}」天的一趟旅行，列出建議攜帶的 10-15 個行李項目。
+      請務必包含：必備文件、建議衣物、電子產品、個人藥品/生活用品。
+      請以繁體中文回答，並以 JSON 陣列格式回傳，格式如下：[{"text": "項目名稱", "category": "分類名稱"}] (分類預計有：必備、衣物、電子、生活、其他)`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: { responseMimeType: "application/json" }
+      });
+
+      res.json(JSON.parse(response.text || '[]'));
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   apiRouter.get('/travel', (req, res) => {
     console.log('[Server] GET /api/travel');
     try {
@@ -77,6 +111,64 @@ async function startServer() {
       res.json(data);
     } catch (e) {
       res.status(500).json({ success: false, error: '讀取資料失敗' });
+    }
+  });
+
+  // Packing API
+  apiRouter.get('/packing', (req, res) => {
+    try {
+      const data = JSON.parse(fs.readFileSync(PACKING_FILE, 'utf-8'));
+      res.json(data);
+    } catch (e) {
+      res.status(500).json([]);
+    }
+  });
+
+  apiRouter.post('/packing', (req, res) => {
+    try {
+      const { text, category } = req.body;
+      const data = JSON.parse(fs.readFileSync(PACKING_FILE, 'utf-8'));
+      const newItem = {
+        id: Math.random().toString(36).substring(2, 11),
+        text,
+        checked: false,
+        category: category || '一般'
+      };
+      data.push(newItem);
+      fs.writeFileSync(PACKING_FILE, JSON.stringify(data, null, 2));
+      res.json(newItem);
+    } catch (e) {
+      res.status(500).json({ error: '儲存失敗' });
+    }
+  });
+
+  apiRouter.patch('/packing/:id', (req, res) => {
+    try {
+      const { id } = req.params;
+      const { checked } = req.body;
+      const data = JSON.parse(fs.readFileSync(PACKING_FILE, 'utf-8'));
+      const item = data.find((i: any) => i.id === id);
+      if (item) {
+        if (checked !== undefined) item.checked = checked;
+        fs.writeFileSync(PACKING_FILE, JSON.stringify(data, null, 2));
+        res.json({ success: true });
+      } else {
+        res.status(404).json({ error: '找不到項目' });
+      }
+    } catch (e) {
+      res.status(500).json({ error: '更新失敗' });
+    }
+  });
+
+  apiRouter.delete('/packing/:id', (req, res) => {
+    try {
+      const { id } = req.params;
+      let data = JSON.parse(fs.readFileSync(PACKING_FILE, 'utf-8'));
+      data = data.filter((i: any) => i.id !== id);
+      fs.writeFileSync(PACKING_FILE, JSON.stringify(data, null, 2));
+      res.json({ success: true });
+    } catch (e) {
+      res.status(500).json({ error: '刪除失敗' });
     }
   });
 
