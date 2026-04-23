@@ -18,7 +18,8 @@ if (!fs.existsSync(DATA_FILE)) {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  // Render.com uses the PORT environment variable
+  const PORT = Number(process.env.PORT) || 3000;
 
   // IMPORTANT: Body parser must be before routes
   app.use(express.json());
