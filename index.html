@@ -56,12 +56,114 @@
             </div>
             <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-2">城市旅遊規劃</h1>
             <p class="text-sky-100 text-lg max-w-md mx-auto">記錄每一個想去的角落，規劃下一場完美的冒險。</p>
+            
+            <!-- Navbar/Tabs -->
+            <div class="flex justify-center mt-8">
+                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-1 flex gap-1 border border-white/30">
+                    <button onclick="switchTab('guide')" id="tabGuide" class="px-6 py-2 rounded-xl text-sm font-bold transition-all bg-white text-sky-600">
+                        使用指南
+                    </button>
+                    <button onclick="switchTab('plan')" id="tabPlan" class="px-6 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
+                        行程規劃
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 -mt-16 relative z-20">
-        <!-- Input Form Card -->
-        <div class="max-w-4xl mx-auto mb-8">
+        <!-- Tab 1: Usage Guide Page (Default) -->
+        <div id="pageGuide" class="max-w-4xl mx-auto space-y-8">
+            <div class="glass-card rounded-3xl shadow-xl p-8 space-y-8">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">如何使用城市旅遊規劃系統？</h2>
+                    <p class="text-slate-500">只需簡單四步，輕鬆開啟您的夢想旅程。</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex gap-4 p-4 rounded-3xl bg-sky-50 border border-sky-100">
+                        <div class="w-10 h-10 rounded-full bg-sky-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-sky-200">1</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-1">精確輸入資訊</h3>
+                            <p class="text-sm text-slate-600">在主分頁中填寫「目的地」，並注意「預計日期」與「天數」標註為 <span class="text-red-500 font-bold">(必填)</span>。這些資訊是 AI 生成精確行程與導航的關鍵。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-4 rounded-3xl bg-amber-50 border border-amber-100">
+                        <div class="w-10 h-10 rounded-full bg-amber-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-amber-200">2</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-1">召喚 AI 導遊</h3>
+                            <p class="text-sm text-slate-600">點擊「AI 建議行程」按鈕。Gemini AI 會分析當地的季節氣候、旅遊預算，並規劃出一份從早到晚的完整每日路線圖。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-4 rounded-3xl bg-emerald-50 border border-emerald-100">
+                        <div class="w-10 h-10 rounded-full bg-emerald-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-emerald-200">3</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-1">一鍵採納建議</h3>
+                            <p class="text-sm text-slate-600">預覽 AI 的規劃後，點擊「採用此完整建議」。系統會自動將氣候、預算與對應行程填入，省去大量手動輸入的時間。</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4 p-4 rounded-3xl bg-indigo-50 border border-indigo-100">
+                        <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-indigo-200">4</div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 mb-1">管理個人清單</h3>
+                            <p class="text-sm text-slate-600">點擊「建立行程」存檔。您可以在下方清單中查看、刪除或標記完成。已完成的項目會變淡並加上橫線，方便管理進度。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-slate-800 px-2 flex items-center gap-2">
+                        <i data-lucide="help-circle" class="w-5 h-5 text-sky-600"></i> 常見問題 FAQ
+                    </h3>
+                    <div class="space-y-3">
+                        <details class="group bg-white border border-slate-200 rounded-2xl overflow-hidden active:scale-[0.99] transition-all">
+                            <summary class="flex items-center justify-between p-4 cursor-pointer list-none font-semibold text-slate-700">
+                                為何點擊 AI 建議沒有反應？
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-all"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-slate-600 border-t border-slate-100">
+                                請確保已填寫「目的地」、「日期」與「天數」。為了節省資源，系統會先驗證這些必要欄位後再進行 AI 調解。
+                            </div>
+                        </details>
+                        <details class="group bg-white border border-slate-200 rounded-2xl overflow-hidden active:scale-[0.99] transition-all">
+                            <summary class="flex items-center justify-between p-4 cursor-pointer list-none font-semibold text-slate-700">
+                                我可以修改 AI 的建議嗎？
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-all"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-slate-600 border-t border-slate-100">
+                                當然可以！採用建議後，所有內容都會回到輸入框中。您可以對行程細節進行手動編輯，直到滿意為止再點擊建立。
+                            </div>
+                        </details>
+                        <details class="group bg-white border border-slate-200 rounded-2xl overflow-hidden active:scale-[0.99] transition-all">
+                            <summary class="flex items-center justify-between p-4 cursor-pointer list-none font-semibold text-slate-700">
+                                我的資料會不見嗎？
+                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-all"></i>
+                            </summary>
+                            <div class="p-4 pt-0 text-sm text-slate-600 border-t border-slate-100">
+                                行程資料會儲存於伺服器端（Cloud Run）。除非資料庫被重置，否則您的計畫會一直保留在「我的清單」中。
+                            </div>
+                        </details>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                    <h4 class="font-bold text-slate-800 mb-3 flex items-center gap-2">
+                        <i data-lucide="info" class="w-5 h-5 text-sky-600"></i> 進階小貼士
+                    </h4>
+                    <ul class="space-y-2 text-sm text-slate-600 list-disc pl-5">
+                        <li><strong>手動填寫：</strong> 您不一定要使用 AI，也可以完全手動填寫預算、氣候與詳細行程內容。</li>
+                        <li><strong>數據儲存：</strong> 本系統會將行程儲存於伺服器端，即使重新整理網頁，您的旅遊計畫也不會遺失。</li>
+                        <li><strong>AI 的準確性：</strong> AI 提供的預算與氣候資訊僅供參考，出發前請務必再次確認即時資訊。</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Planning Page -->
+        <div id="pagePlan" class="hidden space-y-8">
+            <!-- Input Form Card -->
+            <div class="max-w-4xl mx-auto">
             <div class="glass-card rounded-3xl shadow-xl p-6 md:p-8">
                 <div class="space-y-6">
                     <!-- Row 1: City & AI Button -->
@@ -85,23 +187,16 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div class="space-y-2">
                             <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
-                                <i data-lucide="calendar" class="w-4 h-4"></i> 預計日期
+                                <i data-lucide="calendar" class="w-4 h-4"></i> 預計日期 <span class="text-red-500 text-xs">(必填)</span>
                             </label>
-                            <input type="date" id="dateInput" 
+                            <input type="date" id="dateInput" required
                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
                         </div>
                         <div class="space-y-2">
                             <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
-                                <i data-lucide="clock" class="w-4 h-4"></i> 停留天數
+                                <i data-lucide="clock" class="w-4 h-4"></i> 停留天數 <span class="text-red-500 text-xs">(必填)</span>
                             </label>
-                            <input type="number" id="daysInput" placeholder="天數" min="1"
-                                   class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-sm font-semibold text-slate-600 flex items-center gap-2">
-                                <i data-lucide="camera" class="w-4 h-4"></i> 想去的景點
-                            </label>
-                            <input type="text" id="spotsInput" placeholder="景點、美食..." 
+                            <input type="number" id="daysInput" placeholder="天數" min="1" required
                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none transition-all">
                         </div>
                         <div class="space-y-2">
@@ -142,37 +237,37 @@
                     </button>
                 </div>
             </div>
-        </div>
 
-        <!-- List Section -->
-        <div class="max-w-4xl mx-auto">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                    我的清單 <span id="countBadge" class="text-sm bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">0</span>
-                </h2>
-                <button onclick="loadData()" class="text-sky-600 hover:text-sky-700 flex items-center gap-1 text-sm font-medium">
-                    <i data-lucide="refresh-cw" class="w-4 h-4" id="refreshIcon"></i> 重新整理
-                </button>
-            </div>
-
-            <!-- Loading State -->
-            <div id="loadingState" class="hidden py-20 text-center">
-                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 mx-auto"></div>
-                <p class="text-slate-500 font-medium">正在同步雲端資料...</p>
-            </div>
-
-            <!-- Empty State -->
-            <div id="emptyState" class="hidden py-20 text-center glass-card rounded-3xl border-dashed border-2 border-slate-300">
-                <div class="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="plane" class="w-10 h-10 text-slate-400"></i>
+            <!-- List Section -->
+            <div class="max-w-4xl mx-auto py-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        我的清單 <span id="countBadge" class="text-sm bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">0</span>
+                    </h2>
+                    <button onclick="loadData()" class="text-sky-600 hover:text-sky-700 flex items-center gap-1 text-sm font-medium">
+                        <i data-lucide="refresh-cw" class="w-4 h-4" id="refreshIcon"></i> 重新整理
+                    </button>
                 </div>
-                <h3 class="text-xl font-bold text-slate-700 mb-2">還沒有任何計畫</h3>
-                <p class="text-slate-500">開始規劃你的第一場旅行吧！</p>
-            </div>
 
-            <!-- Item List -->
-            <div id="travelList" class="grid grid-cols-1 gap-4">
-                <!-- Cards will be injected here -->
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden py-20 text-center">
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 mx-auto"></div>
+                    <p class="text-slate-500 font-medium">正在同步雲端資料...</p>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="hidden py-20 text-center glass-card rounded-3xl border-dashed border-2 border-slate-300">
+                    <div class="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="plane" class="w-10 h-10 text-slate-400"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-700 mb-2">還沒有任何計畫</h3>
+                    <p class="text-slate-500">開始規劃你的第一場旅行吧！</p>
+                </div>
+
+                <!-- Item List -->
+                <div id="travelList" class="grid grid-cols-1 gap-4">
+                    <!-- Cards will be injected here -->
+                </div>
             </div>
         </div>
     </main>
@@ -223,6 +318,27 @@
 
         // State Management
         let travelData = [];
+        
+        window.switchTab = function(tab) {
+            const pagePlan = document.getElementById('pagePlan');
+            const pageGuide = document.getElementById('pageGuide');
+            const tabPlan = document.getElementById('tabPlan');
+            const tabGuide = document.getElementById('tabGuide');
+
+            if (tab === 'plan') {
+                pagePlan.classList.remove('hidden');
+                pageGuide.classList.add('hidden');
+                tabPlan.className = 'px-6 py-2 rounded-xl text-sm font-bold transition-all bg-white text-sky-600';
+                tabGuide.className = 'px-6 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10';
+            } else {
+                pagePlan.classList.add('hidden');
+                pageGuide.classList.remove('hidden');
+                tabPlan.className = 'px-6 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10';
+                tabGuide.className = 'px-6 py-2 rounded-xl text-sm font-bold transition-all bg-white text-sky-600';
+                // Trigger icon creation for newly revealed section
+                lucide.createIcons();
+            }
+        }
         
         function showItinerary(title, content) {
             document.getElementById('modalTitle').innerText = title + ' - 詳細行程';
@@ -322,7 +438,6 @@
                             <div class="flex flex-wrap gap-4 text-sm text-slate-500">
                                 <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-4 h-4"></i> ${item['日期'] || '未定'}</span>
                                 <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4"></i> ${item['天數'] ? item['天數'] + ' 天' : '天數未定'}</span>
-                                <span class="flex items-center gap-1"><i data-lucide="map-pin" class="w-4 h-4"></i> ${item['景點'] || '探索中'}</span>
                                 <span class="flex items-center gap-1 font-medium text-amber-600"><i data-lucide="banknote" class="w-4 h-4"></i> ${item['預算'] || '未填寫'}</span>
                                 <span class="flex items-center gap-1 text-sky-500"><i data-lucide="cloud-sun" class="w-4 h-4"></i> ${item['氣候'] || '未知'}</span>
                             </div>
@@ -353,7 +468,15 @@
             const aiContent = document.getElementById('aiContent');
 
             if (!city) {
-                showToast('請先輸入城市名稱，AI 才能幫你規劃哦！', 'sparkles');
+                showToast('請先輸入城市名稱', 'sparkles');
+                return;
+            }
+            if (!date) {
+                showToast('請輸入預計日期', 'calendar');
+                return;
+            }
+            if (!days) {
+                showToast('請輸入停留天數', 'clock');
                 return;
             }
 
@@ -384,13 +507,7 @@
 
                 aiContent.innerHTML = `
                     <div class="space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <div class="bg-sky-50 p-4 rounded-2xl border border-sky-100">
-                                <h4 class="font-bold text-sky-800 mb-1 flex items-center gap-2">
-                                    <i data-lucide="sparkles" class="w-4 h-4"></i> 推薦景點
-                                </h4>
-                                <p class="text-slate-700 text-sm">${result.spots}</p>
-                            </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100">
                                 <h4 class="font-bold text-amber-800 mb-1 flex items-center gap-2">
                                     <i data-lucide="banknote" class="w-4 h-4"></i> 預估預算
@@ -410,7 +527,7 @@
                             </h4>
                             <p class="text-slate-700 text-sm whitespace-pre-line">${result.itinerary}</p>
                         </div>
-                        <button onclick="adoptSuggestion('${result.spots.replace(/'/g, "\\'")}', '${result.budget.replace(/'/g, "\\'")}', '${result.weather.replace(/'/g, "\\'")}', \`${result.itinerary.replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`)" 
+                        <button onclick="adoptSuggestion('${result.budget.replace(/'/g, "\\'")}', '${result.weather.replace(/'/g, "\\'")}', \`${result.itinerary.replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`)" 
                                 class="w-full py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
                             <i data-lucide="copy-check" class="w-4 h-4"></i> 採用此完整建議
                         </button>
@@ -430,8 +547,7 @@
             }
         }
 
-        function adoptSuggestion(spots, budget, weather, itinerary) {
-            document.getElementById('spotsInput').value = spots;
+        function adoptSuggestion(budget, weather, itinerary) {
             if (budget) document.getElementById('budgetInput').value = budget;
             if (weather) document.getElementById('weatherInput').value = weather;
             if (itinerary) document.getElementById('itineraryInput').value = itinerary;
@@ -442,7 +558,6 @@
             const city = document.getElementById('cityInput').value;
             const date = document.getElementById('dateInput').value;
             const days = document.getElementById('daysInput').value;
-            const spots = document.getElementById('spotsInput').value;
             const budget = document.getElementById('budgetInput').value;
             const weather = document.getElementById('weatherInput').value;
             const itinerary = document.getElementById('itineraryInput').value;
@@ -452,6 +567,14 @@
                 showToast('請輸入目的地城市', 'alert-circle');
                 return;
             }
+            if (!date) {
+                showToast('請輸入預計日期', 'calendar');
+                return;
+            }
+            if (!days) {
+                showToast('請輸入停留天數', 'clock');
+                return;
+            }
 
             btn.disabled = true;
             btn.innerHTML = '<i class="loader w-5 h-5 border-2 border-white border-t-transparent rounded-full"></i> 處理中...';
@@ -459,7 +582,14 @@
             fetch('/api/travel', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ city, date, days, spots, budget, weather, itinerary })
+                body: JSON.stringify({ 
+                    '城市': city, 
+                    '日期': date, 
+                    '天數': days, 
+                    '預算': budget, 
+                    '氣候': weather, 
+                    '行程': itinerary 
+                })
             })
             .then(res => res.json())
             .then(res => {
@@ -468,7 +598,6 @@
                     document.getElementById('cityInput').value = '';
                     document.getElementById('dateInput').value = '';
                     document.getElementById('daysInput').value = '';
-                    document.getElementById('spotsInput').value = '';
                     document.getElementById('budgetInput').value = '';
                     document.getElementById('weatherInput').value = '';
                     document.getElementById('itineraryInput').value = '';
