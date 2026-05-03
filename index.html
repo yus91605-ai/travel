@@ -13,25 +13,25 @@
     <style>
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f8fafc;
-            background-image: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.1) 0, transparent 50%), 
-                              radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.1) 0, transparent 50%);
+            background-color: #fdf2f8; /* Soft Macaron Pink */
+            background-image: radial-gradient(at 0% 0%, rgba(181, 226, 250, 0.3) 0, transparent 50%), 
+                              radial-gradient(at 100% 0%, rgba(229, 212, 240, 0.3) 0, transparent 50%);
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 195, 215, 0.2);
         }
         .item-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .item-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 20px 40px -15px rgba(255, 153, 200, 0.2);
         }
         .loader {
-            border-top-color: #0ea5e9;
+            border-top-color: #FF99C8;
             animation: spinner 1.5s linear infinite;
         }
         @keyframes spinner {
@@ -39,14 +39,30 @@
             100% { transform: rotate(360deg); }
         }
         [v-cloak] { display: none; }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .sticker {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 1;
+        }
         /* Postcard Styling */
         .postcard-card {
             background: #fff;
             background-image: 
-                radial-gradient(circle at 100% 150%, #fef3c7 24%, #fff 25%),
-                radial-gradient(circle at 0% 150%, #fef3c7 24%, #fff 25%);
+                radial-gradient(circle at 100% 150%, #fff1f2 24%, #fff 25%),
+                radial-gradient(circle at 0% 150%, #f0f9ff 24%, #fff 25%);
             position: relative;
             overflow: hidden;
+            border: 8px solid white;
+            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.1);
         }
         .postcard-card::before {
             content: "POSTCARD";
@@ -75,32 +91,44 @@
 <body class="min-h-screen pb-12">
 
     <!-- Header / Hero Section -->
-    <header class="relative overflow-hidden bg-sky-600 pt-16 pb-32 text-white">
-        <div class="absolute inset-0 opacity-20">
+    <header class="relative overflow-hidden bg-rose-200 pt-16 pb-32 text-slate-800">
+        <div class="absolute inset-0 opacity-40">
             <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white"></path>
+                <circle cx="10%" cy="10%" r="20" fill="#B5E2FA" opacity="0.3"></circle>
+                <circle cx="90%" cy="20%" r="15" fill="#E5D4F0" opacity="0.3"></circle>
+                <circle cx="50%" cy="80%" r="25" fill="#D4F0F0" opacity="0.3"></circle>
             </svg>
+            <!-- Decorative Stickers -->
+            <div class="sticker floating top-10 left-[15%] text-rose-300"><i data-lucide="heart" class="w-12 h-12"></i></div>
+            <div class="sticker floating top-20 right-[15%] text-blue-300" style="animation-delay: 1s;"><i data-lucide="plane" class="w-16 h-16"></i></div>
+            <div class="sticker floating bottom-10 left-[20%] text-amber-200" style="animation-delay: 0.5s;"><i data-lucide="sun" class="w-14 h-14"></i></div>
+            <div class="sticker floating bottom-20 right-[10%] text-emerald-200" style="animation-delay: 1.5s;"><i data-lucide="camera" class="w-10 h-10"></i></div>
         </div>
-        <div class="container mx-auto px-4 relative z-10 text-center">
-            <div class="inline-flex items-center justify-center p-3 bg-white/20 rounded-2xl mb-4 backdrop-blur-md">
-                <i data-lucide="map-pin" class="w-8 h-8"></i>
+        <div class="container mx-auto px-4 relative z-10 text-center flex flex-col items-center">
+            <div class="mb-6 relative">
+                <div class="inline-flex items-center justify-center p-4 bg-white/60 rounded-3xl mb-4 backdrop-blur-md shadow-xl border border-white/50 relative z-10">
+                    <img src="https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&q=80&w=200&h=200" class="w-20 h-20 rounded-2xl object-cover shadow-inner" alt="Travel">
+                </div>
+                <div class="absolute -bottom-2 -right-2 bg-rose-400 text-white p-2 rounded-full shadow-lg z-20 animate-bounce">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                </div>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-2">城市旅遊規劃</h1>
-            <p class="text-sky-100 text-lg max-w-md mx-auto">記錄每一個想去的角落，規劃下一場完美的冒險。</p>
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-3 text-slate-800">城市旅遊趣 <span class="text-rose-400">Travel Joy</span></h1>
+
             
             <!-- Navbar/Tabs -->
             <div class="flex justify-center mt-8">
-                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-1 flex flex-wrap justify-center gap-1 border border-white/30">
-                    <button onclick="switchTab('guide')" id="tabGuide" class="px-4 py-2 rounded-xl text-sm font-bold transition-all bg-white text-sky-600">
+                <div class="bg-white/40 backdrop-blur-md rounded-2xl p-1.5 flex flex-wrap justify-center gap-1.5 border border-white/50 shadow-sm">
+                    <button onclick="switchTab('guide')" id="tabGuide" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-rose-500 shadow-sm">
                         使用指南
                     </button>
-                    <button onclick="switchTab('plan')" id="tabPlan" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
+                    <button onclick="switchTab('plan')" id="tabPlan" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-white/20">
                         行程規劃
                     </button>
-                    <button onclick="switchTab('vibes')" id="tabVibes" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
+                    <button onclick="switchTab('vibes')" id="tabVibes" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-white/20">
                         在地靈感
                     </button>
-                    <button onclick="switchTab('postcard')" id="tabPostcard" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
+                    <button onclick="switchTab('postcard')" id="tabPostcard" class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-white/20">
                         旅遊明信片
                     </button>
                 </div>
@@ -119,8 +147,8 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Feature 1 -->
-                    <div class="flex gap-4 p-5 rounded-3xl bg-sky-50 border border-sky-100 shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-sky-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-sky-200">
+                    <div class="flex gap-4 p-5 rounded-3xl bg-blue-50 border border-blue-100 shadow-sm">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-300 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-blue-100">
                             <i data-lucide="sparkles" class="w-6 h-6"></i>
                         </div>
                         <div>
@@ -130,7 +158,7 @@
                     </div>
                     <!-- Feature 2 -->
                     <div class="flex gap-4 p-5 rounded-3xl bg-emerald-50 border border-emerald-100 shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-emerald-200">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-300 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-emerald-100">
                             <i data-lucide="check-square" class="w-6 h-6"></i>
                         </div>
                         <div>
@@ -140,7 +168,7 @@
                     </div>
                     <!-- Feature 3 -->
                     <div class="flex gap-4 p-5 rounded-3xl bg-amber-50 border border-amber-100 shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-amber-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-amber-200">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-200 text-slate-600 flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-amber-100">
                             <i data-lucide="compass" class="w-6 h-6"></i>
                         </div>
                         <div>
@@ -149,8 +177,8 @@
                         </div>
                     </div>
                     <!-- Feature 4 -->
-                    <div class="flex gap-4 p-5 rounded-3xl bg-indigo-50 border border-indigo-100 shadow-sm">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-indigo-200">
+                    <div class="flex gap-4 p-5 rounded-3xl bg-violet-50 border border-violet-100 shadow-sm">
+                        <div class="w-12 h-12 rounded-2xl bg-violet-300 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-violet-100">
                             <i data-lucide="image" class="w-6 h-6"></i>
                         </div>
                         <div>
@@ -227,7 +255,7 @@
                         </div>
                         <div class="md:col-span-1">
                             <button onclick="generateAISuggestion()" id="aiBtn"
-                                    class="w-full bg-amber-100 hover:bg-amber-200 text-amber-700 px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95">
+                                    class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 border border-rose-100">
                                 <i data-lucide="sparkles" class="w-4 h-4"></i> AI 建議行程
                             </button>
                         </div>
@@ -282,7 +310,7 @@
 
                 <div class="mt-6 flex justify-end">
                     <button onclick="handleSubmit()" id="submitBtn"
-                            class="bg-sky-600 hover:bg-sky-700 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-sky-200 transition-all active:scale-95">
+                            class="bg-rose-400 hover:bg-rose-500 text-white px-8 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-rose-100 transition-all active:scale-95">
                         <i data-lucide="plus-circle" class="w-5 h-5"></i> 建立行程
                     </button>
                 </div>
@@ -292,26 +320,29 @@
             <div class="max-w-4xl mx-auto py-8">
                 <div class="flex items-center justify-between mb-6">
                     <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        我的清單 <span id="countBadge" class="text-sm bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full">0</span>
+                        我的清單 <span id="countBadge" class="text-sm bg-rose-100 text-rose-600 px-2.5 py-0.5 rounded-full">0</span>
                     </h2>
-                    <button onclick="loadData()" class="text-sky-600 hover:text-sky-700 flex items-center gap-1 text-sm font-medium">
+                    <button onclick="loadData()" class="text-rose-500 hover:text-rose-600 flex items-center gap-1 text-sm font-medium">
                         <i data-lucide="refresh-cw" class="w-4 h-4" id="refreshIcon"></i> 重新整理
                     </button>
                 </div>
 
                 <!-- Loading State -->
                 <div id="loadingState" class="hidden py-20 text-center">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4 mx-auto"></div>
-                    <p class="text-slate-500 font-medium">正在同步雲端資料...</p>
+                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-rose-100 h-12 w-12 mb-4 mx-auto"></div>
+                    <p class="text-slate-400 font-medium">正在同步雲端資料...</p>
                 </div>
 
                 <!-- Empty State -->
-                <div id="emptyState" class="hidden py-20 text-center glass-card rounded-3xl border-dashed border-2 border-slate-300">
-                    <div class="bg-slate-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="plane" class="w-10 h-10 text-slate-400"></i>
+                <div id="emptyState" class="hidden py-16 text-center glass-card rounded-[3rem] border-dashed border-2 border-rose-200">
+                    <div class="relative w-48 h-48 mx-auto mb-8">
+                        <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&q=80&w=400" class="w-full h-full object-cover rounded-full border-8 border-white shadow-xl floating" alt="Empty Travel">
+                        <div class="absolute -top-4 -right-4 bg-white p-3 rounded-2xl shadow-lg rotate-12">
+                            <i data-lucide="map" class="w-8 h-8 text-rose-400"></i>
+                        </div>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-700 mb-2">還沒有任何計畫</h3>
-                    <p class="text-slate-500">開始規劃你的第一場旅行吧！</p>
+                    <h3 class="text-2xl font-black text-slate-700 mb-2">旅程尚未啟航</h3>
+                    <p class="text-slate-500 font-medium max-w-xs mx-auto">世界這麼大，總有一個地方在等你。<br>點擊上方按鈕開始規劃吧！</p>
                 </div>
 
                 <!-- Item List -->
@@ -350,10 +381,13 @@
                     </div>
                 </div>
 
-                <div id="vibesPageContent" class="mt-12 bg-slate-50/50 rounded-[2rem] p-4 md:p-8 border border-slate-100 min-h-[400px]">
-                    <div class="text-center py-20 text-slate-300">
-                        <i data-lucide="sparkles" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
-                        <p>請選擇行程並點選探索，讓 AI 為您引路。</p>
+                <div id="vibesPageContent" class="mt-12 bg-white/40 rounded-[2rem] p-4 md:p-8 border border-rose-100 min-h-[400px] shadow-inner">
+                    <div class="text-center py-20 text-slate-400">
+                        <div class="mb-6 floating">
+                            <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&q=80&w=200" class="w-24 h-24 mx-auto rounded-3xl border-4 border-white shadow-lg rotate-3" alt="Cute Compass">
+                        </div>
+                        <p class="font-bold text-lg text-rose-300">靈感探索中...</p>
+                        <p class="text-sm opacity-60">請選擇行程並點選探索，讓 AI 帶您看世界。</p>
                     </div>
                 </div>
             </div>
@@ -424,13 +458,14 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="hidden md:flex flex-col items-end justify-between">
-                                    <div class="stamp-area rounded-sm !w-10 !h-12 border-slate-200">
-                                        <i data-lucide="plane" class="w-5 h-5"></i>
+                                <div class="hidden md:flex flex-col items-end justify-between relative">
+                                    <div class="stamp-area rounded-sm !w-12 !h-14 border-rose-200 relative overflow-hidden group">
+                                        <img src="https://images.unsplash.com/photo-1518173946687-a4c8107679ae?auto=format&fit=crop&q=80&w=100" class="absolute inset-0 w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all opacity-40" alt="Stamp">
+                                        <i data-lucide="plane" class="w-5 h-5 relative z-10 text-rose-400"></i>
                                     </div>
                                     <div class="text-right">
-                                        <div class="text-[8px] font-bold text-slate-200 transform -rotate-90 origin-bottom-right mb-8 uppercase">Digital Postcard</div>
-                                        <p class="text-[6px] text-slate-200 font-mono">APP-v1</p>
+                                        <div class="text-[8px] font-bold text-rose-200 transform -rotate-90 origin-bottom-right mb-8 uppercase">Sweet Memories</div>
+                                        <p class="text-[6px] text-slate-200 font-mono">PINK-POST-v1</p>
                                     </div>
                                 </div>
                             </div>
@@ -491,13 +526,13 @@
     <!-- Vibes Modal -->
     <div id="vibesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden transform transition-all">
-            <div class="bg-sky-600 p-8 text-white relative">
-                <button onclick="closeVibes()" class="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-all text-white">
-                    <i data-lucide="x" class="w-6 h-6"></i>
+            <div class="bg-rose-200 p-8 text-slate-800 relative">
+                <button onclick="closeVibes()" class="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-all">
+                    <i data-lucide="x" class="w-6 h-6 text-slate-600"></i>
                 </button>
                 <div class="flex items-center gap-3 mb-2">
-                    <div class="p-2 bg-white/20 rounded-xl">
-                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    <div class="p-2 bg-white/40 rounded-xl">
+                        <i data-lucide="sparkles" class="w-6 h-6 text-rose-500"></i>
                     </div>
                     <h3 class="text-2xl font-bold">在地靈感指南</h3>
                 </div>
@@ -522,7 +557,7 @@
         <div class="glass-card rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
             <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-white/50">
                 <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                    <i data-lucide="map" class="w-6 h-6 text-sky-600"></i> <span id="modalTitle">詳細行程</span>
+                    <i data-lucide="map" class="w-6 h-6 text-rose-400"></i> <span id="modalTitle">詳細行程</span>
                 </h3>
                 <button onclick="closeModal()" class="p-2 hover:bg-slate-100 rounded-full transition-all">
                     <i data-lucide="x" class="w-6 h-6 text-slate-400"></i>
@@ -562,8 +597,8 @@
             const pageIds = ['pageGuide', 'pagePlan', 'pageVibes', 'pagePostcard'];
             const tabIds = ['tabGuide', 'tabPlan', 'tabVibes', 'tabPostcard'];
             
-            const activeClass = 'px-4 py-2 rounded-xl text-sm font-bold transition-all bg-white text-sky-600';
-            const inactiveClass = 'px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10';
+            const activeClass = 'px-5 py-2.5 rounded-xl text-sm font-bold transition-all bg-white text-rose-500 shadow-sm';
+            const inactiveClass = 'px-5 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-white/20';
 
             pageIds.forEach((id, idx) => {
                 const pageEl = document.getElementById(id);
@@ -817,48 +852,48 @@
                 const isDone = item['狀態'] === '已完成' || isAutoDone;
 
                 const card = document.createElement('div');
-                card.className = `item-card glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 ${isDone ? 'opacity-75' : ''}`;
+                card.className = `item-card glass-card rounded-3xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 ${isDone ? 'opacity-60' : ''}`;
                 
                 const displayStatus = isAutoDone ? '已完成' : item['狀態'];
 
                 card.innerHTML = `
-                    <div class="flex items-start gap-4">
+                    <div class="flex items-start gap-5">
                         <div class="mt-1">
                             <button onclick="toggleStatus('${item.ID}', '${item['狀態']}')" 
-                                    class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isDone ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 hover:border-sky-500'}">
-                                ${isDone ? '<i data-lucide="check" class="w-4 h-4"></i>' : ''}
+                                    class="w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${isDone ? 'bg-teal-300 border-teal-300 text-white' : 'border-slate-200 hover:border-rose-300'}">
+                                ${isDone ? '<i data-lucide="check" class="w-5 h-5"></i>' : ''}
                             </button>
                         </div>
                         <div class="flex-1">
-                            <div class="flex items-center gap-2 mb-1">
-                                <h3 class="text-xl font-bold ${isDone ? 'text-slate-400 line-through' : 'text-slate-800'}">${item['城市']}</h3>
-                                <span class="text-xs px-2 py-0.5 rounded-lg font-bold ${isDone ? 'bg-emerald-100 text-emerald-600' : 'bg-sky-100 text-sky-600'}">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="text-2xl font-bold ${isDone ? 'text-slate-300 line-through' : 'text-slate-800'}">${item['城市']}</h3>
+                                <span class="text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider ${isDone ? 'bg-teal-50 text-teal-500' : 'bg-rose-50 text-rose-500'}">
                                     ${displayStatus}
                                 </span>
                             </div>
-                            <div class="flex flex-wrap gap-4 text-sm text-slate-500">
-                                <span class="flex items-center gap-1"><i data-lucide="calendar" class="w-4 h-4"></i> ${item['日期'] || '未定'}</span>
-                                <span class="flex items-center gap-1"><i data-lucide="clock" class="w-4 h-4"></i> ${item['天數'] ? item['天數'] + ' 天' : '天數未定'}</span>
-                                <span class="flex items-center gap-1 font-medium text-amber-600"><i data-lucide="banknote" class="w-4 h-4"></i> ${item['預算'] || '未填寫'}</span>
-                                <span class="flex items-center gap-1 text-sky-500"><i data-lucide="cloud-sun" class="w-4 h-4"></i> ${item['氣候'] || '未知'}</span>
+                            <div class="flex flex-wrap gap-5 text-sm text-slate-500">
+                                <span class="flex items-center gap-1.5"><i data-lucide="calendar" class="w-4 h-4 text-blue-300"></i> ${item['日期'] || '未定'}</span>
+                                <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-4 h-4 text-violet-300"></i> ${item['天數'] ? item['天數'] + ' 天' : '天數未定'}</span>
+                                <span class="flex items-center gap-1.5 font-bold text-amber-400"><i data-lucide="banknote" class="w-4 h-4"></i> ${item['預算'] || '未填寫'}</span>
+                                <span class="flex items-center gap-1.5 text-rose-300"><i data-lucide="cloud-sun" class="w-4 h-4"></i> ${item['氣候'] || '未知'}</span>
                             </div>
                         </div>
                     </div>
-                    <div class="flex items-center justify-end gap-2">
+                    <div class="flex items-center justify-end gap-3">
                         <button onclick="goToVibes('${item['城市']}')"
-                                class="p-2 text-amber-600 hover:bg-amber-50 rounded-xl transition-all flex items-center gap-1 text-sm font-bold">
-                            <i data-lucide="sparkles" class="w-5 h-5"></i> 在地靈感
+                                class="px-4 py-2 text-amber-500 hover:bg-amber-50 rounded-2xl transition-all flex items-center gap-2 text-sm font-bold border border-transparent hover:border-amber-100">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i> 在地靈感
                         </button>
                         <button onclick="goToPostcard('${item.ID}')"
-                                class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all flex items-center gap-1 text-sm font-bold">
-                            <i data-lucide="share-2" class="w-5 h-5"></i> 分享
+                                class="px-4 py-2 text-violet-500 hover:bg-violet-50 rounded-2xl transition-all flex items-center gap-2 text-sm font-bold border border-transparent hover:border-violet-100">
+                            <i data-lucide="share-2" class="w-4 h-4"></i> 分享
                         </button>
                         ${item['行程'] ? `
                         <button onclick="showItinerary('${item['城市']}', \`${item['行程'].replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`)" 
-                                class="p-2 text-sky-600 hover:bg-sky-50 rounded-xl transition-all flex items-center gap-1 text-sm font-bold">
-                            <i data-lucide="eye" class="w-5 h-5"></i> 查看行程
+                                class="px-4 py-2 text-blue-500 hover:bg-blue-50 rounded-2xl transition-all flex items-center gap-2 text-sm font-bold border border-transparent hover:border-blue-100">
+                            <i data-lucide="eye" class="w-4 h-4"></i> 查看
                         </button>` : ''}
-                        <button onclick="deleteItem('${item.ID}')" class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all">
+                        <button onclick="deleteItem('${item.ID}')" class="p-3 text-slate-300 hover:text-red-400 hover:bg-red-50 rounded-2xl transition-all">
                             <i data-lucide="trash-2" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -917,8 +952,8 @@
                 aiContent.innerHTML = `
                     <div class="space-y-3">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100">
-                                <h4 class="font-bold text-amber-800 mb-1 flex items-center gap-2">
+                            <div class="bg-rose-50 p-4 rounded-2xl border border-rose-100">
+                                <h4 class="font-bold text-rose-800 mb-1 flex items-center gap-2">
                                     <i data-lucide="banknote" class="w-4 h-4"></i> 預估預算
                                 </h4>
                                 <p class="text-slate-700 text-sm">${result.budget}</p>
@@ -930,8 +965,8 @@
                                 <p class="text-slate-700 text-sm">${result.weather}</p>
                             </div>
                         </div>
-                        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100">
-                            <h4 class="font-bold text-emerald-800 mb-1 flex items-center gap-2">
+                        <div class="bg-teal-50 p-4 rounded-2xl border border-teal-100">
+                            <h4 class="font-bold text-teal-800 mb-1 flex items-center gap-2">
                                 <i data-lucide="list-ordered" class="w-4 h-4"></i> 完整行程建議
                             </h4>
                             <p class="text-slate-700 text-sm whitespace-pre-line">${result.itinerary}</p>
