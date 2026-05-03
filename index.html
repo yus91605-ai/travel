@@ -39,6 +39,37 @@
             100% { transform: rotate(360deg); }
         }
         [v-cloak] { display: none; }
+        /* Postcard Styling */
+        .postcard-card {
+            background: #fff;
+            background-image: 
+                radial-gradient(circle at 100% 150%, #fef3c7 24%, #fff 25%),
+                radial-gradient(circle at 0% 150%, #fef3c7 24%, #fff 25%);
+            position: relative;
+            overflow: hidden;
+        }
+        .postcard-card::before {
+            content: "POSTCARD";
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 8px;
+            letter-spacing: 2px;
+            color: #d1d5db;
+            font-weight: 800;
+        }
+        .stamp-area {
+            width: 50px;
+            height: 60px;
+            border: 2px dashed #e5e7eb;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #9ca3af;
+            transform: rotate(5deg);
+        }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -66,11 +97,11 @@
                     <button onclick="switchTab('plan')" id="tabPlan" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
                         行程規劃
                     </button>
-                    <button onclick="switchTab('packing')" id="tabPacking" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
-                        行李清單
+                    <button onclick="switchTab('vibes')" id="tabVibes" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
+                        在地靈感
                     </button>
-                    <button onclick="switchTab('insights')" id="tabInsights" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
-                        數據與工具
+                    <button onclick="switchTab('postcard')" id="tabPostcard" class="px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10">
+                        旅遊明信片
                     </button>
                 </div>
             </div>
@@ -82,8 +113,8 @@
         <div id="pageGuide" class="max-w-4xl mx-auto space-y-8">
             <div class="glass-card rounded-3xl shadow-xl p-8 space-y-8">
                 <div class="text-center">
-                    <h2 class="text-3xl font-bold text-slate-800 mb-2">城市旅遊全方位功能手冊</h2>
-                    <p class="text-slate-500">從行程規劃到行李準備，AI 伴您輕鬆起跑。</p>
+                    <h2 class="text-3xl font-bold text-slate-800 mb-2">城市旅遊功能手冊</h2>
+                    <p class="text-slate-500">從行程規劃到在地建議，AI 伴您輕鬆起跑。</p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -110,21 +141,21 @@
                     <!-- Feature 3 -->
                     <div class="flex gap-4 p-5 rounded-3xl bg-amber-50 border border-amber-100 shadow-sm">
                         <div class="w-12 h-12 rounded-2xl bg-amber-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-amber-200">
-                            <i data-lucide="luggage" class="w-6 h-6"></i>
+                            <i data-lucide="compass" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-800 mb-1">AI 智慧行李助手</h3>
-                            <p class="text-sm text-slate-600">在「行李清單」分頁選擇行程。AI 會分析目的地天氣與天數，生成 10-15 項針對性的攜帶建議（如：日本、雨天、3天）。</p>
+                            <h3 class="font-bold text-slate-800 mb-1">AI 在地靈感</h3>
+                            <p class="text-sm text-slate-600">不只是行程！點擊「在地靈感」，AI 會即時打聽當地的秘境景點、必吃美食與特色伴手禮，讓您的旅程更有溫度。</p>
                         </div>
                     </div>
                     <!-- Feature 4 -->
                     <div class="flex gap-4 p-5 rounded-3xl bg-indigo-50 border border-indigo-100 shadow-sm">
                         <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex flex-shrink-0 items-center justify-center font-bold shadow-lg shadow-indigo-200">
-                            <i data-lucide="wrench" class="w-6 h-6"></i>
+                            <i data-lucide="image" class="w-6 h-6"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-800 mb-1">差旅實用工具箱</h3>
-                            <p class="text-sm text-slate-600">透過「數據與工具」分頁，使用即時匯率換算與近期天氣觀測功能。一站式解決旅遊中最常遇到的計算與天氣疑問。</p>
+                            <h3 class="font-bold text-slate-800 mb-1">專屬旅遊明信片</h3>
+                            <p class="text-sm text-slate-600">規劃完成後，點擊「分享」按鈕。系統會將您的行程內容生成一張精美的虛擬明信片，方便您截圖保存或分享給旅伴。</p>
                         </div>
                     </div>
                 </div>
@@ -141,11 +172,11 @@
                         </div>
                         <div class="flex items-center gap-4">
                             <span class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold">2</span>
-                            <span class="text-slate-700">到「行李清單」挑選剛建立的行程，讓 <strong>AI 智慧助手</strong> 幫您列出必備品。</span>
+                            <span class="text-slate-700">點擊清單項目旁的 <strong>在地靈感</strong>，探索當地必買必吃。</span>
                         </div>
                         <div class="flex items-center gap-4">
                             <span class="flex-shrink-0 w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold">3</span>
-                            <span class="text-slate-700">隨時查看「數據與工具」掌握預算比例與匯率變動。</span>
+                            <span class="text-slate-700">準備出發？點擊 <strong>分享</strong> 產出明信片，開啟精彩假期！</span>
                         </div>
                     </div>
                 </div>
@@ -158,41 +189,20 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <details class="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all">
                             <summary class="flex items-center justify-between p-4 cursor-pointer list-none font-semibold text-slate-700 hover:bg-slate-50">
-                                為何 AI 行李助手點了沒反應？
+                                為什麼行程會變淡？
                                 <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-all"></i>
                             </summary>
                             <div class="p-4 pt-0 text-sm text-slate-600 border-t border-slate-100 bg-slate-50/50">
-                                請確保您已從下拉選單中「選擇一個行程」。AI 需要知道您的目的地、天數與當初填寫的天氣資訊，才能為您精準推薦行李。
+                                當您手動勾選完成，或行程日期已過系統自動偵測時，該項目會變淡並加上刪除線，表示此計畫已結束，方便您專注於未來的行程。
                             </div>
                         </details>
-
-                        <details class="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all">
-                            <summary class="flex items-center justify-between p-4 cursor-pointer list-none font-semibold text-slate-700 hover:bg-slate-50">
-                                匯率換算器是即時的嗎？
-                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-all"></i>
-                            </summary>
-                            <div class="p-4 pt-0 text-sm text-slate-600 border-t border-slate-100 bg-slate-50/50">
-                                本系統提供的匯率為參考數值。由於匯率波動快速，建議在實際換匯或大額消費前，參考當下銀行提供的即時匯價。
-                            </div>
-                        </details>
-
                         <details class="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all">
                             <summary class="flex items-center justify-between p-4 cursor-pointer list-none font-semibold text-slate-700 hover:bg-slate-50">
                                 我的計畫會自動消失嗎？
                                 <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-all"></i>
                             </summary>
                             <div class="p-4 pt-0 text-sm text-slate-600 border-t border-slate-100 bg-slate-50/50">
-                                不會。您的資料儲存在伺服器端（data.json）。除非您手動刪除行程或清空清單，否則計畫會永久保留。
-                            </div>
-                        </details>
-
-                        <details class="group bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm transition-all">
-                            <summary class="flex items-center justify-between p-4 cursor-pointer list-none font-semibold text-slate-700 hover:bg-slate-50">
-                                為什麼行程會變淡？
-                                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-400 group-open:rotate-180 transition-all"></i>
-                            </summary>
-                            <div class="p-4 pt-0 text-sm text-slate-600 border-t border-slate-100 bg-slate-50/50">
-                                當您手動勾選完成，或行程日期已過系統自動偵測時，該項目會變淡並加上刪除線，表示此計畫已結束，方便您專注於未來的行程。
+                                不會。您的資料儲存在伺服器端。除非您手動刪除行程，否則計畫會永久保留。
                             </div>
                         </details>
                     </div>
@@ -311,156 +321,193 @@
             </div>
         </div>
 
-        <!-- Tab 3: Packing List Page -->
-        <div id="pagePacking" class="hidden max-w-4xl mx-auto space-y-6">
-            <!-- AI Packing Smart Assistant -->
-            <div class="glass-card rounded-3xl shadow-xl p-6 md:p-8 border-t-4 border-sky-500">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-sky-100 text-sky-600 rounded-xl">
-                        <i data-lucide="sparkles" class="w-6 h-6"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-800">AI 行李智慧助手</h3>
-                        <p class="text-slate-500 text-sm">選擇一個行程，由 AI 為您規劃專屬行李清單。</p>
+        <!-- Tab 3: AI Local Vibes Page -->
+        <div id="pageVibes" class="hidden max-w-4xl mx-auto space-y-6">
+            <div class="glass-card rounded-3xl shadow-xl p-8 border-t-4 border-amber-500">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-amber-100 text-amber-600 rounded-2xl">
+                            <i data-lucide="compass" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">在地靈感挖掘機</h2>
+                            <p class="text-slate-500">從必吃美食到打卡景點，挖掘城市最道地的靈魂。</p>
+                        </div>
                     </div>
                 </div>
-                <div class="flex flex-col md:flex-row gap-3">
-                    <select id="packingTripSelect" class="flex-1 px-4 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-sky-500">
-                        <option value="">選擇您的行程...</option>
-                    </select>
-                    <button onclick="generateAIPacking()" id="aiPackingBtn" class="bg-amber-100 hover:bg-amber-200 text-amber-700 px-6 py-2 rounded-xl font-bold transition-all flex items-center justify-center gap-2">
-                        <i data-lucide="zap" class="w-4 h-4"></i> 生成建議
-                    </button>
-                    <button onclick="clearPackingList()" class="text-slate-400 hover:text-red-500 text-sm font-medium">清空所有</button>
-                </div>
-            </div>
 
-            <div class="glass-card rounded-3xl shadow-xl p-6 md:p-8">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold text-slate-800">行李檢查清單</h2>
-                        <p class="text-slate-500 text-sm">出發前最後確認，別漏掉重要裝備。</p>
+                <div class="mt-8 flex flex-col md:flex-row gap-4">
+                    <div class="flex-1 space-y-2">
+                        <label class="text-sm font-bold text-slate-600 ml-1">選擇您的行程</label>
+                        <select id="vibesSelect" class="w-full px-4 py-3 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-amber-500 bg-white/50">
+                            <option value="">選擇一個已有的目的地...</option>
+                        </select>
                     </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="packingInput" placeholder="新增行李項目..." 
-                               class="px-4 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-sky-500 w-full md:w-64">
-                        <button onclick="addPackingItem()" class="bg-sky-600 text-white p-2 px-4 rounded-xl font-bold hover:bg-sky-700 transition-all flex items-center gap-2">
-                            <i data-lucide="plus" class="w-4 h-4"></i> 新增
+                    <div class="flex items-end">
+                        <button onclick="getVibesFromSelect()" class="w-full md:w-auto bg-amber-500 text-white px-8 py-3 rounded-2xl font-bold hover:bg-amber-600 transition-all flex items-center justify-center gap-2 h-[52px]">
+                            <i data-lucide="search" class="w-5 h-5"></i> 開始探索
                         </button>
                     </div>
                 </div>
 
-                <div id="packingList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Packing items will be injected here -->
+                <div id="vibesPageContent" class="mt-12 bg-slate-50/50 rounded-[2rem] p-4 md:p-8 border border-slate-100 min-h-[400px]">
+                    <div class="text-center py-20 text-slate-300">
+                        <i data-lucide="sparkles" class="w-12 h-12 mx-auto mb-4 opacity-20"></i>
+                        <p>請選擇行程並點選探索，讓 AI 為您引路。</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Tab 4: Travel Insights Page -->
-        <div id="pageInsights" class="hidden max-w-4xl mx-auto space-y-6">
-            <!-- Toolkit Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Currency Converter -->
-                <div class="glass-card rounded-3xl p-6 shadow-lg border-2 border-amber-100">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i data-lucide="refresh-ccw" class="w-5 h-5 text-amber-500"></i> 即時匯率換算
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-2">
-                            <input type="number" id="curAmount" value="1000" class="flex-1 px-3 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-amber-500">
-                            <select id="curFrom" class="bg-slate-50 px-2 py-2 rounded-lg border">
-                                <option value="TWD">TWD</option>
-                                <option value="JPY">JPY</option>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="KRW">KRW</option>
-                            </select>
+        <!-- Tab 4: Postcard Page -->
+        <div id="pagePostcard" class="hidden max-w-4xl mx-auto space-y-6">
+            <div class="glass-card rounded-3xl shadow-xl p-8 border-t-4 border-indigo-500">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-indigo-100 text-indigo-600 rounded-2xl">
+                            <i data-lucide="image" class="w-8 h-8"></i>
                         </div>
-                        <div class="flex justify-center text-slate-300">
-                            <i data-lucide="arrow-down-up" class="w-5 h-5"></i>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800">專屬旅程回憶錄</h2>
+                            <p class="text-slate-500">將您的行程規劃轉化為精美的數位明信片。</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <div id="curResult" class="flex-1 px-3 py-2 bg-slate-50 border rounded-lg font-bold text-slate-700">正在計算...</div>
-                            <select id="curTo" class="bg-slate-50 px-2 py-2 rounded-lg border">
-                                <option value="JPY" selected>JPY</option>
-                                <option value="TWD">TWD</option>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                                <option value="KRW">KRW</option>
-                            </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Control Panel -->
+                    <div class="lg:col-span-1 space-y-6">
+                        <div class="space-y-4 bg-slate-50 p-6 rounded-3xl border border-slate-100">
+                            <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                                <i data-lucide="settings-2" class="w-4 h-4 text-indigo-500"></i> 設定明信片
+                            </h3>
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-slate-500 uppercase">選擇行程</label>
+                                <select id="postcardSelect" onchange="updatePostcardPreview()" class="w-full px-3 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="">請選擇...</option>
+                                </select>
+                            </div>
+                            <div class="pt-4">
+                                <button onclick="downloadPostcard()" class="w-full bg-slate-800 text-white px-4 py-3 rounded-xl font-bold shadow-lg hover:bg-slate-900 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="download" class="w-4 h-4"></i> 下載回憶
+                                </button>
+                            </div>
                         </div>
-                        <p class="text-[10px] text-slate-400">註：匯率為參考固定值，實際依銀行匯率為準。</p>
+                        <div class="p-4 rounded-2xl bg-indigo-50 text-indigo-600 text-[10px] leading-relaxed">
+                            <i data-lucide="info" class="w-3 h-3 inline mr-1"></i> 您可以右鍵點擊明信片圖片並選擇「另存圖片」或直接截圖。本工具會自動整合您的行程摘要。
+                        </div>
                     </div>
-                </div>
 
-                <!-- Weather Watch -->
-                <div class="glass-card rounded-3xl p-6 shadow-lg border-2 border-sky-100">
-                    <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                        <i data-lucide="sun-medium" class="w-5 h-5 text-sky-500"></i> 近期城市氣候
-                    </h3>
-                    <div id="weatherWatch" class="space-y-3">
-                        <!-- Upcoming weather snippets -->
-                        <div class="text-center py-6 text-slate-400">目前尚無即將到來的行程。</div>
+                    <!-- Preview Section -->
+                    <div class="lg:col-span-2 flex flex-col items-center">
+                        <div id="postcardPreview" class="postcard-card w-full rounded-2xl shadow-xl p-6 md:p-8 transform transition-all duration-500 hover:rotate-1">
+                            <div class="flex flex-col md:flex-row gap-6 mt-4">
+                                <div class="flex-1 space-y-6">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-sky-600 tracking-widest uppercase mb-1 block">Travel Memory</span>
+                                        <h2 id="prevPostCity" class="text-4xl font-black text-slate-800 leading-tight">探索世界</h2>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-3 text-slate-500">
+                                            <i data-lucide="calendar" class="w-3 h-3 text-sky-500"></i>
+                                            <span id="prevPostDate" class="text-xs font-medium">即將出發</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 text-slate-500">
+                                            <i data-lucide="cloud-sun" class="w-3 h-3 text-sky-500"></i>
+                                            <span id="prevPostWeather" class="text-xs font-medium">預備好心情</span>
+                                        </div>
+                                    </div>
+                                    <div class="pt-4 border-t border-slate-100 min-h-[80px]">
+                                        <p class="text-[8px] font-bold text-slate-400 mb-2 uppercase tracking-tighter">Itinerary Highlights</p>
+                                        <div id="prevPostHighlights" class="space-y-1 text-[11px] text-slate-600 italic">
+                                            <div>• 開始規劃您的精彩人生行程</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="hidden md:flex flex-col items-end justify-between">
+                                    <div class="stamp-area rounded-sm !w-10 !h-12 border-slate-200">
+                                        <i data-lucide="plane" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-[8px] font-bold text-slate-200 transform -rotate-90 origin-bottom-right mb-8 uppercase">Digital Postcard</div>
+                                        <p class="text-[6px] text-slate-200 font-mono">APP-v1</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <!-- Stat Cards -->
-                <div class="glass-card rounded-3xl p-4 md:p-6 shadow-lg text-center">
-                    <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i data-lucide="plane" class="w-5 h-5"></i>
-                    </div>
-                    <div class="text-2xl font-bold text-slate-800" id="statTotal">0</div>
-                    <div class="text-xs text-slate-500">總計畫</div>
-                </div>
-                <div class="glass-card rounded-3xl p-4 md:p-6 shadow-lg text-center">
-                    <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i data-lucide="check-circle" class="w-5 h-5"></i>
-                    </div>
-                    <div class="text-2xl font-bold text-slate-800" id="statDone">0</div>
-                    <div class="text-xs text-slate-500">已完旅程</div>
-                </div>
-                <div class="glass-card rounded-3xl p-4 md:p-6 shadow-lg text-center">
-                    <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i data-lucide="clock" class="w-5 h-5"></i>
-                    </div>
-                    <div class="text-2xl font-bold text-slate-800" id="statPending">0</div>
-                    <div class="text-xs text-slate-500">待出發</div>
-                </div>
-                <div class="glass-card rounded-3xl p-4 md:p-6 shadow-lg text-center border-2 border-sky-100">
-                    <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i data-lucide="wallet" class="w-5 h-5"></i>
-                    </div>
-                    <div class="text-xl md:text-2xl font-bold text-slate-800" id="statBudget">0</div>
-                    <div class="text-xs text-slate-500">總估算預算</div>
-                </div>
-            </div>
-
-            <!-- Budget Chart Section -->
-            <div class="glass-card rounded-3xl shadow-xl p-8">
-                <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
-                    <i data-lucide="bar-chart-3" class="w-6 h-6 text-sky-600"></i> 行程預算分析
-                </h3>
-                <div id="budgetChart" class="space-y-4">
-                    <!-- Chart bars will be injected here -->
-                </div>
-                <div id="chartEmpty" class="py-10 text-center text-slate-400 hidden">
-                    尚未有足夠的預算資料進行分析。
-                </div>
-            </div>
-
-            <!-- Location Cloud Space -->
-            <div class="glass-card rounded-3xl shadow-xl p-8">
-                <h3 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <i data-lucide="map-pin" class="w-6 h-6 text-sky-600"></i> 足跡分佈
-                </h3>
-                <div id="locationCloud" class="flex flex-wrap gap-2">
-                    <!-- Locations will be injected here -->
                 </div>
             </div>
         </div>
     </main>
+
+    <!-- Postcard Modal -->
+    <div id="postcardModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="postcard-card w-full max-w-2xl rounded-3xl shadow-2xl p-8 transform transition-all relative">
+            <button onclick="closePostcard()" class="absolute top-4 left-4 p-2 text-slate-400 hover:text-slate-600 transition-all">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </button>
+            <div class="flex flex-col md:flex-row gap-8 mt-6">
+                <!-- Left Side: Content -->
+                <div class="flex-1 space-y-6">
+                    <div>
+                        <span class="text-xs font-bold text-sky-600 tracking-widest uppercase mb-1 block">Travel Memory</span>
+                        <h2 id="postCity" class="text-5xl font-black text-slate-800 leading-tight">City</h2>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 text-slate-500">
+                            <i data-lucide="calendar" class="w-4 h-4 text-sky-500"></i>
+                            <span id="postDate" class="text-sm font-medium">Date</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-slate-500">
+                            <i data-lucide="cloud-sun" class="w-4 h-4 text-sky-500"></i>
+                            <span id="postWeather" class="text-sm font-medium">Weather</span>
+                        </div>
+                    </div>
+                    <div class="pt-4 border-t border-slate-100">
+                        <p class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-tighter">Selected Highlights</p>
+                        <div id="postHighlights" class="space-y-1 text-sm text-slate-600 italic">
+                            <!-- Highlights -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Right Side: Stamp & Visuals -->
+                <div class="hidden md:flex flex-col items-end justify-between">
+                    <div class="stamp-area rounded-sm">
+                        <i data-lucide="plane" class="w-6 h-6"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] font-bold text-slate-300 transform -rotate-90 origin-bottom-right mb-12">AUTHENTIC TRAVELER</div>
+                        <p class="text-[8px] text-slate-300 font-mono">APPLET-v1.0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-12 text-center text-[10px] text-slate-400 border-t border-slate-50 pt-4">
+                由 AI Studio 城市旅遊規劃系統生成的專屬明信片
+            </div>
+        </div>
+    </div>
+
+    <!-- Vibes Modal -->
+    <div id="vibesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden transform transition-all">
+            <div class="bg-sky-600 p-8 text-white relative">
+                <button onclick="closeVibes()" class="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-all text-white">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="p-2 bg-white/20 rounded-xl">
+                        <i data-lucide="sparkles" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold">在地靈感指南</h3>
+                </div>
+                <p id="vibesCity" class="opacity-80 text-sm">城市</p>
+            </div>
+            <div id="vibesContent" class="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
+                <!-- Vibes loading/content -->
+            </div>
+        </div>
+    </div>
 
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 translate-y-20 opacity-0 transition-all duration-300 z-50">
@@ -508,13 +555,12 @@
 
         // --- State ---
         let travelData = [];
-        let packingData = [];
         
         // --- Core Navigation ---
         window.switchTab = function(tab) {
             console.log('Switching to tab:', tab);
-            const pageIds = ['pageGuide', 'pagePlan', 'pagePacking', 'pageInsights'];
-            const tabIds = ['tabGuide', 'tabPlan', 'tabPacking', 'tabInsights'];
+            const pageIds = ['pageGuide', 'pagePlan', 'pageVibes', 'pagePostcard'];
+            const tabIds = ['tabGuide', 'tabPlan', 'tabVibes', 'tabPostcard'];
             
             const activeClass = 'px-4 py-2 rounded-xl text-sm font-bold transition-all bg-white text-sky-600';
             const inactiveClass = 'px-4 py-2 rounded-xl text-sm font-bold transition-all text-white hover:bg-white/10';
@@ -533,158 +579,157 @@
                 }
             });
 
-            if (tab === 'insights') {
-                renderInsights();
-                updateCurrencyConverter();
-                updateWeatherWatch();
-            }
-            if (tab === 'packing') {
-                loadPackingData();
-                updateTripSelect();
-            }
+            if (tab === 'vibes') updateVibesSelect();
+            if (tab === 'postcard') updatePostcardSelect();
             
             if (window.lucide) lucide.createIcons();
         }
 
-        // --- Travel Toolkit Logic ---
-        function updateCurrencyConverter() {
-            const amountInput = document.getElementById('curAmount');
-            const fromSelect = document.getElementById('curFrom');
-            const toSelect = document.getElementById('curTo');
-            const resultDiv = document.getElementById('curResult');
+        // --- Vibes & Postcard Logic ---
 
-            // Hardcoded reference rates for demo/utility
-            const rates = {
-                TWD: 1,
-                JPY: 4.81, // 1 TWD = 4.81 JPY
-                USD: 0.031, // 1 TWD = 0.031 USD
-                EUR: 0.029,
-                KRW: 42.5
-            };
-
-            function calculate() {
-                const amount = parseFloat(amountInput.value) || 0;
-                const from = fromSelect.value;
-                const to = toSelect.value;
-                
-                // Convert to TWD first
-                const twdValue = amount / rates[from];
-                // Then to target
-                const final = twdValue * rates[to];
-                
-                resultDiv.innerText = `${final.toLocaleString(undefined, { maximumFractionDigits: 2 })} ${to}`;
-            }
-
-            [amountInput, fromSelect, toSelect].forEach(el => {
-                el.addEventListener('input', calculate);
+        function updateVibesSelect() {
+            const select = document.getElementById('vibesSelect');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">選擇一個已有的目的地...</option>';
+            travelData.forEach(trip => {
+                const opt = document.createElement('option');
+                opt.value = trip['城市'];
+                opt.innerText = `${trip['城市']} (${trip['日期'] || '未定'})`;
+                select.appendChild(opt);
             });
-            calculate();
+            select.value = currentVal;
         }
 
-        function updateWeatherWatch() {
-            const container = document.getElementById('weatherWatch');
-            const upcoming = travelData.filter(i => i['狀態'] !== '已完成').slice(0, 3);
-            
-            if (upcoming.length === 0) {
-                container.innerHTML = '<div class="text-center py-6 text-slate-400">目前尚無即將到來的行程。</div>';
+        function updatePostcardSelect() {
+            const select = document.getElementById('postcardSelect');
+            const currentVal = select.value;
+            select.innerHTML = '<option value="">請選擇行程...</option>';
+            travelData.forEach(trip => {
+                const opt = document.createElement('option');
+                opt.value = trip.ID;
+                opt.innerText = `${trip['城市']} (${trip['日期'] || '未定'})`;
+                select.appendChild(opt);
+            });
+            select.value = currentVal;
+        }
+
+        async function getVibesFromSelect() {
+            const select = document.getElementById('vibesSelect');
+            const city = select.value;
+            if (!city) {
+                showToast('請先選擇城市', 'alert-circle');
                 return;
             }
 
-            container.innerHTML = upcoming.map(trip => `
-                <div class="flex items-center justify-between p-3 bg-white/50 rounded-2xl border border-slate-100">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 bg-sky-50 text-sky-600 rounded-lg">
-                            <i data-lucide="cloud-sun" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-slate-800">${trip['城市']}</div>
-                            <div class="text-[10px] text-slate-500">${trip['日期'] || '日期未定'}</div>
-                        </div>
-                    </div>
-                    <div class="text-xs font-medium text-sky-600 bg-sky-100 px-2 py-1 rounded-lg">
-                        ${trip['氣候'] || '暫無資訊'}
-                    </div>
+            const contentEl = document.getElementById('vibesPageContent');
+            contentEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 space-y-4">
+                    <div class="loader w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full mb-4"></div>
+                    <p class="text-slate-500 animate-pulse font-medium text-lg">正在向當地人打聽情報...</p>
                 </div>
-            `).join('');
+            `;
+
+            try {
+                const res = await fetch('/api/ai/vibes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ city })
+                });
+                const data = await res.json();
+                
+                contentEl.innerHTML = `
+                    <div class="space-y-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                        <section>
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center">
+                                    <i data-lucide="utensils" class="w-5 h-5"></i>
+                                </div>
+                                <h4 class="text-xl font-bold text-slate-800">必吃美食</h4>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                ${data.food.map(f => `
+                                    <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                                        <p class="font-bold text-slate-700">${f}</p>
+                                        <p class="text-xs text-slate-400 mt-2">推薦地道小吃 / 餐廳</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </section>
+
+                        <section>
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center">
+                                    <i data-lucide="gift" class="w-5 h-5"></i>
+                                </div>
+                                <h4 class="text-xl font-bold text-slate-800">特色紀念品</h4>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${data.souvenir.map(s => `
+                                    <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                                        <p class="font-bold text-slate-700">${s}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </section>
+
+                        <section>
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center">
+                                    <i data-lucide="camera" class="w-5 h-5"></i>
+                                </div>
+                                <h4 class="text-xl font-bold text-slate-800">必拍景點</h4>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${data.spots.map(s => `
+                                    <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                                        <p class="font-bold text-slate-700">${s}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </section>
+                    </div>
+                `;
+                lucide.createIcons();
+            } catch (error) {
+                contentEl.innerHTML = `<div class="text-center py-20 text-red-400">連線失敗，請檢查網路或稍後再試。</div>`;
+            }
+        }
+
+        function updatePostcardPreview() {
+            const select = document.getElementById('postcardSelect');
+            const id = select.value;
+            if (!id) {
+                document.getElementById('prevPostCity').innerText = '探索世界';
+                document.getElementById('prevPostDate').innerText = '即將出發';
+                document.getElementById('prevPostWeather').innerText = '預備好心情';
+                document.getElementById('prevPostHighlights').innerHTML = '<div>• 開始規劃您的精彩人生行程</div>';
+                return;
+            }
+
+            const trip = travelData.find(t => t.ID === id);
+            if (!trip) return;
+
+            document.getElementById('prevPostCity').innerText = trip['城市'];
+            document.getElementById('prevPostDate').innerText = trip['日期'] || 'Adventure Awaits';
+            document.getElementById('prevPostWeather').innerText = trip['氣候'] || '美好的一天';
+            
+            const highlights = document.getElementById('prevPostHighlights');
+            if (trip['行程']) {
+                const lines = trip['行程'].split('\n').filter(l => l.trim()).slice(0, 3);
+                highlights.innerHTML = lines.map(l => `<div>• ${l.substring(0, 40)}${l.length > 40 ? '...' : ''}</div>`).join('');
+            } else {
+                highlights.innerHTML = '<div>• 尚無行程摘要</div>';
+            }
             lucide.createIcons();
         }
 
-        // --- Enhanced Packing Logic ---
-        function updateTripSelect() {
-            const select = document.getElementById('packingTripSelect');
-            select.innerHTML = '<option value="">選擇您的行程...</option>';
-            travelData.forEach(trip => {
-                const option = document.createElement('option');
-                option.value = JSON.stringify({
-                    city: trip['城市'],
-                    weather: trip['氣候'],
-                    days: trip['天數']
-                });
-                option.innerText = `${trip['城市']} (${trip['日期'] || '未定'})`;
-                select.appendChild(option);
-            });
-        }
-
-        async function generateAIPacking() {
-            const select = document.getElementById('packingTripSelect');
-            const btn = document.getElementById('aiPackingBtn');
-            const dataStr = select.value;
-            
-            if (!dataStr) {
-                showToast('請先選擇一個行程', 'alert-circle');
+        function downloadPostcard() {
+            const select = document.getElementById('postcardSelect');
+            if (!select.value) {
+                showToast('請先選擇行程', 'alert-circle');
                 return;
             }
-
-            const tripData = JSON.parse(dataStr);
-            btn.disabled = true;
-            btn.innerHTML = '<i class="loader w-4 h-4 border-2 border-amber-700 border-t-transparent rounded-full"></i> 生成中...';
-
-            try {
-                const res = await fetch('/api/ai/packing', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        city: tripData.city, 
-                        weather: tripData.weather || '適合旅遊的天氣',
-                        days: tripData.days || 3
-                    })
-                });
-
-                const items = await res.json();
-                
-                // Add all to server and update UI
-                for (const item of items) {
-                    await fetch('/api/packing', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: item.text, category: item.category })
-                    });
-                }
-                
-                loadPackingData();
-                showToast(`已為您在行李清單中新增了 ${items.length} 項建議！`, 'sparkles');
-            } catch (e) {
-                console.error(e);
-                showToast('生成失敗，請稍後再試', 'alert-circle');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i data-lucide="zap" class="w-4 h-4"></i> 生成建議';
-                lucide.createIcons();
-            }
-        }
-
-        function clearPackingList() {
-            if (!confirm('確定要清空所有行李項目嗎？')) return;
-            
-            const promises = packingData.map(item => 
-                fetch(`/api/packing/${item.id}`, { method: 'DELETE' })
-            );
-
-            Promise.all(promises).then(() => {
-                packingData = [];
-                renderPackingList();
-                showToast('已清空行李清單');
-            });
+            showToast('截圖功能準備中！請手動截圖保存這份精美回憶。', 'image');
         }
         
         function showItinerary(title, content) {
@@ -800,6 +845,14 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-end gap-2">
+                        <button onclick="goToVibes('${item['城市']}')"
+                                class="p-2 text-amber-600 hover:bg-amber-50 rounded-xl transition-all flex items-center gap-1 text-sm font-bold">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i> 在地靈感
+                        </button>
+                        <button onclick="goToPostcard('${item.ID}')"
+                                class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all flex items-center gap-1 text-sm font-bold">
+                            <i data-lucide="share-2" class="w-5 h-5"></i> 分享
+                        </button>
                         ${item['行程'] ? `
                         <button onclick="showItinerary('${item['城市']}', \`${item['行程'].replace(/`/g, '\\`').replace(/\${/g, '\\${')}\`)" 
                                 class="p-2 text-sky-600 hover:bg-sky-50 rounded-xl transition-all flex items-center gap-1 text-sm font-bold">
@@ -1004,155 +1057,7 @@
             .catch(err => console.error('刪除失敗:', err));
         }
 
-        // --- Packing List Logic ---
-        function loadPackingData() {
-            fetch('/api/packing')
-                .then(res => res.json())
-                .then(data => {
-                    packingData = data;
-                    renderPackingList();
-                });
-        }
-
-        function renderPackingList() {
-            const container = document.getElementById('packingList');
-            container.innerHTML = '';
-            
-            packingData.forEach(item => {
-                const div = document.createElement('div');
-                div.className = `p-4 glass-card rounded-2xl flex items-center justify-between gap-3 transition-all ${item.checked ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-100'}`;
-                div.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <button onclick="togglePackingItem('${item.id}', ${!item.checked})" 
-                                class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${item.checked ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300'}">
-                            ${item.checked ? '<i data-lucide="check" class="w-3 h-3"></i>' : ''}
-                        </button>
-                        <div>
-                            <span class="text-sm font-medium ${item.checked ? 'text-slate-400 line-through' : 'text-slate-700'}">${item.text}</span>
-                            <span class="ml-2 text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded">${item.category}</span>
-                        </div>
-                    </div>
-                    <button onclick="deletePackingItem('${item.id}')" class="text-slate-300 hover:text-red-500 transition-all">
-                        <i data-lucide="x" class="w-4 h-4"></i>
-                    </button>
-                `;
-                container.appendChild(div);
-            });
-            lucide.createIcons();
-        }
-
-        function addPackingItem() {
-            const input = document.getElementById('packingInput');
-            const text = input.value.trim();
-            if (!text) return;
-            
-            fetch('/api/packing', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, category: '一般' })
-            })
-            .then(res => res.json())
-            .then(newItem => {
-                packingData.push(newItem);
-                renderPackingList();
-                input.value = '';
-                showToast('已新增行李項目');
-            });
-        }
-
-        function togglePackingItem(id, checked) {
-            fetch(`/api/packing/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ checked })
-            })
-            .then(() => {
-                const item = packingData.find(i => i.id === id);
-                if (item) item.checked = checked;
-                renderPackingList();
-            });
-        }
-
-        function deletePackingItem(id) {
-            fetch(`/api/packing/${id}`, { method: 'DELETE' })
-            .then(() => {
-                packingData = packingData.filter(i => i.id !== id);
-                renderPackingList();
-            });
-        }
-
-        // --- Insights Logic ---
-        function renderInsights() {
-            const total = travelData.length;
-            const done = travelData.filter(i => i['狀態'] === '已完成').length;
-            const pending = total - done;
-
-            // Calculate total budget
-            const totalBudget = travelData.reduce((acc, item) => {
-                const num = parseInt(item['預算']?.replace(/[^0-9]/g, '') || '0') || 0;
-                return acc + num;
-            }, 0);
-
-            document.getElementById('statTotal').innerText = total;
-            document.getElementById('statDone').innerText = done;
-            document.getElementById('statPending').innerText = pending;
-            document.getElementById('statBudget').innerText = '$' + totalBudget.toLocaleString();
-
-            // Budget Chart
-            const chartArea = document.getElementById('budgetChart');
-            const chartEmpty = document.getElementById('chartEmpty');
-            chartArea.innerHTML = '';
-
-            const validBudgets = travelData.filter(i => i['預算'] && i['預算'].match(/\d+/));
-            if (validBudgets.length === 0) {
-                chartEmpty.classList.remove('hidden');
-            } else {
-                chartEmpty.classList.add('hidden');
-                
-                // Parse budget numbers
-                const parsed = validBudgets.map(i => {
-                    const num = parseInt(i['預算'].replace(/[^0-9]/g, '')) || 0;
-                    return { city: i['城市'], val: num };
-                });
-                
-                const maxVal = Math.max(...parsed.map(p => p.val));
-
-                parsed.forEach(p => {
-                    const percent = Math.max((p.val / maxVal) * 100, 5); // at least 5% bar
-                    const bar = document.createElement('div');
-                    bar.innerHTML = `
-                        <div class="space-y-1">
-                            <div class="flex justify-between text-xs font-semibold text-slate-600">
-                                <span>${p.city}</span>
-                                <span class="text-sky-600">$${p.val.toLocaleString()}</span>
-                            </div>
-                            <div class="h-4 bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-full bg-sky-500 transition-all duration-1000 ease-out" style="width: 0%" data-width="${percent}%"></div>
-                            </div>
-                        </div>
-                    `;
-                    chartArea.appendChild(bar);
-                });
-
-                // Animate bars
-                setTimeout(() => {
-                    chartArea.querySelectorAll('[data-width]').forEach(el => {
-                        el.style.width = el.getAttribute('data-width');
-                    });
-                }, 100);
-            }
-
-            // Location Cloud
-            const cloud = document.getElementById('locationCloud');
-            cloud.innerHTML = '';
-            const cities = Array.from(new Set(travelData.map(i => i['城市'])));
-            cities.forEach(city => {
-                const badge = document.createElement('span');
-                badge.className = 'px-3 py-1 bg-white border border-slate-200 text-slate-600 rounded-full text-xs font-medium hover:bg-sky-50 hover:border-sky-200 transition-all cursor-default';
-                badge.innerText = city;
-                cloud.appendChild(badge);
-            });
-        }
+        // --- Toast & UI ---
 
         function showToast(msg, icon = 'check-circle') {
             const toast = document.getElementById('toast');
@@ -1169,19 +1074,124 @@
         }
 
         // Export functions to window for UI events
+        // --- Vibes & Postcard Logic ---
+
+        async function showVibes(city) {
+            const modal = document.getElementById('vibesModal');
+            const cityEl = document.getElementById('vibesCity');
+            const contentEl = document.getElementById('vibesContent');
+            
+            cityEl.innerText = city;
+            contentEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12 space-y-4">
+                    <div class="loader w-10 h-10 border-4 border-sky-500 border-t-transparent rounded-full mb-2"></div>
+                    <p class="text-slate-400 animate-pulse font-medium">正在向當地嚮導打聽推薦資訊...</p>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/ai/vibes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ city })
+                });
+                const data = await res.json();
+                
+                contentEl.innerHTML = `
+                    <div class="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <section>
+                            <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <span class="w-1 h-4 bg-amber-400 rounded-full"></span> 必吃美食推荐
+                            </h4>
+                            <div class="grid grid-cols-1 gap-2">
+                                ${data.food.map(f => `<div class="p-4 bg-amber-50/50 rounded-2xl border border-amber-100/50 text-slate-700 font-medium flex items-center gap-3"><i data-lucide="utensils" class="w-4 h-4 text-amber-500"></i> ${f}</div>`).join('')}
+                            </div>
+                        </section>
+                        <section>
+                            <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <span class="w-1 h-4 bg-sky-400 rounded-full"></span> 特色紀念品
+                            </h4>
+                            <div class="grid grid-cols-1 gap-2">
+                                ${data.souvenir.map(s => `<div class="p-4 bg-sky-50/50 rounded-2xl border border-sky-100/50 text-slate-700 font-medium flex items-center gap-3"><i data-lucide="gift" class="w-4 h-4 text-sky-500"></i> ${s}</div>`).join('')}
+                            </div>
+                        </section>
+                        <section>
+                            <h4 class="text-sm font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                <span class="w-1 h-4 bg-emerald-400 rounded-full"></span> 必拍熱門景點
+                            </h4>
+                            <div class="grid grid-cols-1 gap-2">
+                                ${data.spots.map(s => `<div class="p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 text-slate-700 font-medium flex items-center gap-3"><i data-lucide="camera" class="w-4 h-4 text-emerald-500"></i> ${s}</div>`).join('')}
+                            </div>
+                        </section>
+                    </div>
+                `;
+                lucide.createIcons();
+            } catch (error) {
+                contentEl.innerHTML = `<p class="text-red-500">無法取得資訊，請稍後再試。</p>`;
+            }
+        }
+
+        function closeVibes() {
+            document.getElementById('vibesModal').classList.add('hidden');
+        }
+
+        function showPostcard(id) {
+            const trip = travelData.find(t => t.ID === id);
+            if (!trip) return;
+
+            document.getElementById('postCity').innerText = trip['城市'];
+            document.getElementById('postDate').innerText = trip['日期'] || 'Adventure Awaits';
+            document.getElementById('postWeather').innerText = trip['氣候'] || 'Weathering the trip';
+            
+            const highlights = document.getElementById('postHighlights');
+            if (trip['行程']) {
+                const lines = trip['行程'].split('\n').filter(l => l.trim()).slice(0, 4);
+                highlights.innerHTML = lines.map(l => `<div>• ${l.substring(0, 30)}${l.length > 30 ? '...' : ''}</div>`).join('');
+            } else {
+                highlights.innerHTML = '<div>• 寫下您的專屬旅程...</div>';
+            }
+
+            document.getElementById('postcardModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closePostcard() {
+            document.getElementById('postcardModal').classList.add('hidden');
+        }
+
+        function goToVibes(city) {
+            window.switchTab('vibes');
+            updateVibesSelect(); // Force immediate update of options
+            setTimeout(() => {
+                const select = document.getElementById('vibesSelect');
+                select.value = city;
+                getVibesFromSelect();
+            }, 100);
+        }
+
+        function goToPostcard(id) {
+            window.switchTab('postcard');
+            updatePostcardSelect(); // Force immediate update of options
+            setTimeout(() => {
+                const select = document.getElementById('postcardSelect');
+                select.value = id;
+                updatePostcardPreview();
+            }, 100);
+        }
+
         Object.assign(window, {
             showLoading, loadData, handleSubmit, toggleStatus, 
             deleteItem, generateAISuggestion, adoptSuggestion, 
-            showItinerary, closeModal, addPackingItem,
-            togglePackingItem, deletePackingItem, renderInsights, loadPackingData, 
-            renderPackingList, generateAIPacking, clearPackingList
+            showItinerary, closeModal, showVibes, closeVibes, showPostcard, closePostcard,
+            getVibesFromSelect, updatePostcardPreview, downloadPostcard,
+            goToVibes, goToPostcard
         });
 
         // Initialize UI
         window.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
             loadData();
-            loadPackingData();
         });
     </script>
 </body>

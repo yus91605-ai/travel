@@ -104,6 +104,40 @@ async function startServer() {
     }
   });
 
+  // AI Local Vibe Guide
+  apiRouter.post('/ai/vibes', async (req, res) => {
+    try {
+      const { city } = req.body;
+      const rawKey = process.env.api_key || process.env.GEMINI_API_KEY;
+      if (!rawKey) return res.status(401).json({ error: 'Missing API Key' });
+      
+      const apiKey = rawKey.trim().replace(/^["']|["']$/g, '');
+      const ai = new GoogleGenAI({ apiKey });
+
+      const prompt = `你是一位旅遊專家，請為「${city}」這個城市提供「在地靈感指南」。
+      請包含：
+      1. 必吃美食 (3個)
+      2. 特色紀念品 (2個)
+      3. 必拍景點 (2個)
+      請以繁體中文回答，並以 JSON 格式回傳，格式如下：
+      {
+        "food": ["美食1", "美食2", "美食3"],
+        "souvenir": ["紀念品1", "紀念品2"],
+        "spots": ["景點1", "景點2"]
+      }`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: { responseMimeType: "application/json" }
+      });
+
+      res.json(JSON.parse(response.text || '{}'));
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   apiRouter.get('/travel', (req, res) => {
     console.log('[Server] GET /api/travel');
     try {
