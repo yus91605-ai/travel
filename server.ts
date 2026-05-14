@@ -104,41 +104,6 @@ async function startServer() {
     }
   });
 
-  // AI Local Vibe Guide
-  apiRouter.post('/ai/vibes', async (req, res) => {
-    try {
-      const { city } = req.body;
-      const rawKey = process.env.api_key || process.env.GEMINI_API_KEY;
-      if (!rawKey) return res.status(401).json({ error: 'Missing API Key' });
-      
-      const apiKey = rawKey.trim().replace(/^["']|["']$/g, '');
-      const ai = new GoogleGenAI({ apiKey });
-
-      const prompt = `你是一位旅遊專家，請為「${city}」這個城市提供「在地靈感指南」。
-      請包含：
-      1. 必吃美食 (3個)，每個項目請包含：名稱、一段簡短誘人的描述。
-      2. 特色紀念品 (2個)，每個項目請包含：名稱、推薦理由。
-      3. 必拍景點 (2個)，每個項目請包含：名稱、最佳拍攝時間點或小撇步。
-      
-      請以繁體中文回答，並以 JSON 格式回傳，格式如下：
-      {
-        "food": [{"name": "美食1", "desc": "描述"}, ...],
-        "souvenir": [{"name": "紀念品1", "reason": "理由"}, ...],
-        "spots": [{"name": "景點1", "tip": "小撇步"}, ...]
-      }`;
-
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: prompt,
-        config: { responseMimeType: "application/json" }
-      });
-
-      res.json(JSON.parse(response.text || '{}'));
-    } catch (e: any) {
-      res.status(500).json({ error: e.message });
-    }
-  });
-
   apiRouter.get('/travel', (req, res) => {
     console.log('[Server] GET /api/travel');
     try {
