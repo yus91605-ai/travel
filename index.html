@@ -494,6 +494,27 @@
         </div>
     </div>
 
+    <!-- Vibes Modal -->
+    <div id="vibesModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden transform transition-all">
+            <div class="bg-rose-200 p-8 text-slate-800 relative">
+                <button onclick="closeVibes()" class="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-all">
+                    <i data-lucide="x" class="w-6 h-6 text-slate-600"></i>
+                </button>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="p-2 bg-white/40 rounded-xl">
+                        <i data-lucide="sparkles" class="w-6 h-6 text-rose-500"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold">在地靈感指南</h3>
+                </div>
+                <p id="vibesCity" class="opacity-80 text-sm">城市</p>
+            </div>
+            <div id="vibesContent" class="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
+                <!-- Vibes loading/content -->
+            </div>
+        </div>
+    </div>
+
     <!-- Notification Toast -->
     <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 translate-y-20 opacity-0 transition-all duration-300 z-50">
         <div class="bg-slate-800 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
@@ -855,6 +876,10 @@
                         </div>
                     </div>
                     <div class="flex items-center justify-end gap-3">
+                        <button onclick="showVibes(\`${item['城市'].replace(/`/g, '\\`').replace(/'/g, "\\'").replace(/"/g, '&quot;')}\`)"
+                                class="px-4 py-2 text-amber-500 hover:bg-amber-50 rounded-2xl transition-all flex items-center gap-2 text-sm font-bold border border-transparent hover:border-amber-100">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i> 在地靈感
+                        </button>
                         <button onclick="goToPostcard('${item.ID}')"
                                 class="px-4 py-2 text-violet-500 hover:bg-violet-50 rounded-2xl transition-all flex items-center gap-2 text-sm font-bold border border-transparent hover:border-violet-100">
                             <i data-lucide="share-2" class="w-4 h-4"></i> 分享
@@ -1123,6 +1148,133 @@
         // Export functions to window for UI events
         // --- Vibes & Postcard Logic ---
 
+        // --- Vibes & Postcard Logic ---
+
+        async function showVibes(city) {
+            console.log('[Vibes] Showing vibes for:', city);
+            const modal = document.getElementById('vibesModal');
+            const cityEl = document.getElementById('vibesCity');
+            const contentEl = document.getElementById('vibesContent');
+            
+            if (!modal || !cityEl || !contentEl) {
+                console.error('Vibes modal elements missing');
+                return;
+            }
+
+            cityEl.innerText = city;
+            contentEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 space-y-4">
+                    <div class="loader w-12 h-12 border-4 border-rose-400 border-t-transparent rounded-full mb-2"></div>
+                    <p class="text-slate-500 animate-pulse font-bold text-center">正在為您挖掘 ${city} 的在地靈魂...</p>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const res = await fetch('/api/ai/vibes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ city })
+                });
+                
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                
+                contentEl.innerHTML = `
+                    <div class="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-4">
+                        <section>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 bg-amber-100 text-amber-500 rounded-2xl flex items-center justify-center shadow-sm">
+                                    <i data-lucide="utensils" class="w-5 h-5"></i>
+                                </div>
+                                <h4 class="text-lg font-black text-slate-800">必吃美食推荐</h4>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                ${(data.food || []).map(f => `
+                                    <div class="group p-5 bg-gradient-to-br from-amber-50 to-white rounded-3xl border border-amber-100/50 shadow-sm transition-all hover:shadow-md">
+                                        <div class="w-full h-32 rounded-2xl bg-rose-50 mb-4 overflow-hidden relative">
+                                            <img crossorigin="anonymous" src="https://loremflickr.com/400/300/${encodeURIComponent(f.keyword || 'food')},${encodeURIComponent(city)}/all" class="w-full h-full object-cover" alt="${f.name || '美食'}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'">
+                                        </div>
+                                        <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
+                                            <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span> ${f.name || '名稱'}
+                                        </p>
+                                        <p class="text-xs text-slate-500 leading-relaxed">${f.desc || ''}</p>
+                                    </div>
+                                `).join('')}
+                                ${(data.food && data.food.length === 0) ? '<p class="text-slate-400 text-sm italic">暫無美食推薦</p>' : ''}
+                            </div>
+                        </section>
+
+                        <section>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 bg-sky-100 text-sky-500 rounded-2xl flex items-center justify-center shadow-sm">
+                                    <i data-lucide="gift" class="w-5 h-5"></i>
+                                </div>
+                                <h4 class="text-lg font-black text-slate-800">特色紀念品</h4>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                ${(data.souvenir || []).map(s => `
+                                    <div class="p-5 bg-gradient-to-br from-sky-50 to-white rounded-3xl border border-sky-100/50 shadow-sm transition-all hover:shadow-md">
+                                        <div class="w-full h-32 rounded-2xl bg-sky-50 mb-4 overflow-hidden relative">
+                                            <img crossorigin="anonymous" src="https://loremflickr.com/400/300/${encodeURIComponent(s.keyword || 'souvenir')},${encodeURIComponent(city)}/all" class="w-full h-full object-cover" alt="${s.name}" onerror="this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&h=200&fit=crop'">
+                                        </div>
+                                        <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
+                                            <span class="w-1.5 h-1.5 bg-sky-400 rounded-full"></span> ${s.name || '推薦'}
+                                        </p>
+                                        <p class="text-xs text-slate-500 leading-relaxed">${s.reason || ''}</p>
+                                    </div>
+                                `).join('')}
+                                ${(data.souvenir && data.souvenir.length === 0) ? '<p class="text-slate-400 text-sm italic">暫無紀念品推薦</p>' : ''}
+                            </div>
+                        </section>
+
+                        <section>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 bg-emerald-100 text-emerald-500 rounded-2xl flex items-center justify-center shadow-sm">
+                                    <i data-lucide="camera" class="w-5 h-5"></i>
+                                </div>
+                                <h4 class="text-lg font-black text-slate-800">必拍熱門景點</h4>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4">
+                                ${(data.spots || []).map(s => `
+                                    <div class="p-5 bg-gradient-to-br from-emerald-50 to-white rounded-3xl border border-emerald-100/50 shadow-sm transition-all hover:shadow-md">
+                                        <div class="w-full h-48 bg-emerald-50 overflow-hidden mb-4 rounded-2xl">
+                                            <img crossorigin="anonymous" src="https://loremflickr.com/600/400/${encodeURIComponent(s.keyword || 'landmark')},${encodeURIComponent(city)}/all" class="w-full h-full object-cover" alt="${s.name}" onerror="this.src='https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop'">
+                                        </div>
+                                        <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
+                                            <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> ${s.name || '景點'}
+                                        </p>
+                                        <div class="bg-white/60 p-3 rounded-2xl text-xs text-slate-600 flex gap-2 items-start">
+                                            <i data-lucide="lightbulb" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5"></i>
+                                            <span>${s.tip || ''}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                ${(data.spots && data.spots.length === 0) ? '<p class="text-slate-400 text-sm italic">暫無景點推薦</p>' : ''}
+                            </div>
+                        </section>
+                    </div>
+                `;
+                if (window.lucide) lucide.createIcons();
+            } catch (error) {
+                console.error('[Vibes Error]', error);
+                contentEl.innerHTML = `
+                    <div class="text-center py-12">
+                        <i data-lucide="alert-circle" class="w-12 h-12 text-red-300 mx-auto mb-4"></i>
+                        <p class="text-red-500 font-bold">無法取得資訊，請檢查網路連接。</p>
+                        <button onclick="showVibes(\`${city.replace(/'/g, "\\'")}\`)" class="mt-4 px-4 py-2 bg-slate-100 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all">重試</button>
+                    </div>
+                `;
+                if (window.lucide) lucide.createIcons();
+            }
+        }
+
+        function closeVibes() {
+            document.getElementById('vibesModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
         function showPostcard(id) {
             const trip = travelData.find(t => t.ID === id);
             if (!trip) return;
@@ -1169,7 +1321,7 @@
         Object.assign(window, {
             showLoading, loadData, handleSubmit, toggleStatus, 
             deleteItem, generateAISuggestion, adoptSuggestion, 
-            showItinerary, closeModal, showPostcard, closePostcard,
+            showItinerary, closeModal, showVibes, closeVibes, showPostcard, closePostcard,
             updatePostcardPreview, downloadPostcard, changePostTheme,
             validateInputs, goToPostcard, switchTab
         });

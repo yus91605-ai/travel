@@ -104,6 +104,47 @@ async function startServer() {
     }
   });
 
+  // AI Local Vibe Guide
+  apiRouter.post('/ai/vibes', async (req, res) => {
+    try {
+      const { city } = req.body;
+      const rawKey = process.env.api_key || process.env.GEMINI_API_KEY;
+      if (!rawKey) return res.status(401).json({ error: 'Missing API Key' });
+      
+      const apiKey = rawKey.trim().replace(/^["']|["']$/g, '');
+      const ai = new GoogleGenAI({ apiKey });
+
+      const prompt = `你是一位旅遊專家，請為「${city}」這個城市提供一份深度「在地靈感指南」。
+      請挖掘一些當地人才知道的秘境或特色，不要只給大眾景點。
+      
+      請包含：
+      1. 必吃美食 (3個)：名稱、一段簡短誘人的描述、該食物的一個英文關鍵字(用於搜圖)。
+      2. 特色紀念品 (2個)：名稱、推薦理由、該項目的一個英文關鍵字(用於搜圖)。
+      3. 秘境景點 (2個)：名稱、為什麼它是秘境、最佳拍攝時間點或小撇步、該景點的一個英文關鍵字(用於搜圖)。
+      
+      請以繁體中文回答，並以 JSON 格式回傳，格式如下：
+      {
+        "food": [{"name": "名稱", "desc": "描述", "keyword": "english_keyword"}, ...],
+        "souvenir": [{"name": "名稱", "reason": "理由", "keyword": "english_keyword"}, ...],
+        "spots": [{"name": "名稱", "reason": "為何是秘境", "tip": "小撇步", "keyword": "english_keyword"}, ...]
+      }`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: { responseMimeType: "application/json" }
+      });
+
+      const responseText = response.text || '{}';
+      console.log('[Server] AI Vibes raw response:', responseText.substring(0, 500) + (responseText.length > 500 ? '...' : ''));
+      
+      res.json(JSON.parse(responseText));
+    } catch (e: any) {
+      console.error('[Server] AI Vibes Route Error:', e);
+      res.status(500).json({ error: e.message || 'AI 獲取靈感失敗' });
+    }
+  });
+
   apiRouter.get('/travel', (req, res) => {
     console.log('[Server] GET /api/travel');
     try {
