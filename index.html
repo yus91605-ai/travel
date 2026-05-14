@@ -1145,9 +1145,6 @@
             }, 3000);
         }
 
-        // Export functions to window for UI events
-        // --- Vibes & Postcard Logic ---
-
         // --- Vibes & Postcard Logic ---
 
         async function showVibes(city) {
@@ -1178,7 +1175,10 @@
                     body: JSON.stringify({ city })
                 });
                 
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                if (!res.ok) {
+                    const errorJson = await res.json().catch(() => ({}));
+                    throw new Error(errorJson.error || `HTTP ${res.status}`);
+                }
                 const data = await res.json();
                 
                 contentEl.innerHTML = `
@@ -1260,10 +1260,13 @@
             } catch (error) {
                 console.error('[Vibes Error]', error);
                 contentEl.innerHTML = `
-                    <div class="text-center py-12">
+                    <div class="text-center py-12 px-6">
                         <i data-lucide="alert-circle" class="w-12 h-12 text-red-300 mx-auto mb-4"></i>
-                        <p class="text-red-500 font-bold">無法取得資訊，請檢查網路連接。</p>
-                        <button onclick="showVibes(\`${city.replace(/'/g, "\\'")}\`)" class="mt-4 px-4 py-2 bg-slate-100 rounded-xl text-sm font-bold hover:bg-slate-200 transition-all">重試</button>
+                        <p class="text-red-500 font-bold mb-2">無法取得資訊</p>
+                        <p class="text-slate-500 text-sm mb-6">${error.message}</p>
+                        <button onclick="showVibes(\`${city.replace(/'/g, "\\'")}\`)" class="px-6 py-2 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-all shadow-lg shadow-amber-100">
+                            重新嘗試
+                        </button>
                     </div>
                 `;
                 if (window.lucide) lucide.createIcons();
