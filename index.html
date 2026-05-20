@@ -7,7 +7,7 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Caveat:wght@400..700&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- html2canvas for postcard export -->
@@ -18,6 +18,10 @@
             background-color: #fdf2f8; /* Soft Macaron Pink */
             background-image: radial-gradient(at 0% 0%, rgba(181, 226, 250, 0.3) 0, transparent 50%), 
                               radial-gradient(at 100% 0%, rgba(229, 212, 240, 0.3) 0, transparent 50%);
+        }
+        .font-handwriting {
+            font-family: 'Klee One', 'Caveat', 'Inter', cursive, sans-serif;
+            font-weight: 500;
         }
         .glass-card {
             background: rgba(255, 255, 255, 0.6);
@@ -418,6 +422,13 @@
                             </div>
                         </div>
 
+                        <div class="space-y-1.5 border-t border-slate-100 pt-3">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="pen-line" class="w-3.5 h-3.5 text-indigo-500"></i> STEP 4. 撰寫專屬旅遊心得 (自訂文字)
+                            </label>
+                            <textarea id="postcardMessageInput" oninput="handlePostcardMessageInput(event)" rows="3" maxlength="150" placeholder="在此寫下您的個人旅遊隨筆、心得與感動點滴...（本文字不會經由 AI 修改，完美保留您的真實回憶）" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-medium text-slate-700 resize-none"></textarea>
+                        </div>
+
                         <div class="pt-1.5">
                             <button onclick="downloadPostcard(event)" class="w-full bg-slate-800 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-slate-900 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-md">
                                 <i data-lucide="download" class="w-4 h-4"></i> 下載回憶明信片
@@ -621,6 +632,25 @@
             select.value = currentVal;
         }
 
+        function handlePostcardMessageInput(event) {
+            const select = document.getElementById('postcardSelect');
+            const id = select ? select.value : '';
+            if (!id) return;
+            
+            const val = event.target.value;
+            localStorage.setItem('postcard_message_' + id, val);
+            
+            const highlights = document.getElementById('prevPostHighlights');
+            if (highlights) {
+                if (val.trim()) {
+                    const lines = val.split('\n');
+                    highlights.innerHTML = lines.map(l => `<div class="leading-relaxed font-handwriting select-none whitespace-pre-wrap break-all">${l}</div>`).join('');
+                } else {
+                    highlights.innerHTML = '<div class="text-slate-400/80 italic">在此寫下您的自訂心得...</div>';
+                }
+            }
+        }
+
         function updatePostcardPreview() {
             const select = document.getElementById('postcardSelect');
             const id = select.value;
@@ -628,7 +658,9 @@
                 document.getElementById('prevPostCity').innerText = '探索世界';
                 document.getElementById('prevPostDate').innerText = '即將出發';
                 document.getElementById('prevPostWeather').innerText = '預備好心情';
-                document.getElementById('prevPostHighlights').innerHTML = '<div>• 開始規劃您的精彩人生行程</div>';
+                document.getElementById('prevPostHighlights').innerHTML = '<div class="font-handwriting">• 開始規劃您的精彩人生行程</div>';
+                const messageInput = document.getElementById('postcardMessageInput');
+                if (messageInput) messageInput.value = '';
                 loadPostcardPhoto();
                 return;
             }
@@ -644,12 +676,25 @@
             document.getElementById('prevPostDate').innerText = trip['日期'] || 'Adventure Awaits';
             document.getElementById('prevPostWeather').innerText = trip['氣候'] || '美好的一天';
             
+            const messageInput = document.getElementById('postcardMessageInput');
+            let savedMessage = localStorage.getItem('postcard_message_' + id);
+            
+            // If first time and empty, let's pre-populate a warm local message containing their destination (not AI generated, but manually editable)
+            if (savedMessage === null) {
+                savedMessage = `今天來到了 ${trip['城市']}！\n漫步在街頭感受這裡獨特的氣息，看著美麗的風景。\n每一個轉角都是驚喜，這場旅行真叫人難忘！💖`;
+                localStorage.setItem('postcard_message_' + id, savedMessage);
+            }
+            
+            if (messageInput) {
+                messageInput.value = savedMessage;
+            }
+
             const highlights = document.getElementById('prevPostHighlights');
-            if (trip['行程']) {
-                const lines = trip['行程'].split('\n').filter(l => l.trim()).slice(0, 3);
-                highlights.innerHTML = lines.map(l => `<div>• ${l.substring(0, 40)}${l.length > 40 ? '...' : ''}</div>`).join('');
+            if (savedMessage.trim()) {
+                const lines = savedMessage.split('\n');
+                highlights.innerHTML = lines.map(l => `<div class="leading-relaxed font-handwriting select-none whitespace-pre-wrap break-all">${l}</div>`).join('');
             } else {
-                highlights.innerHTML = '<div>• 尚無行程摘要</div>';
+                highlights.innerHTML = '<div class="text-slate-400/80 italic">在此寫下您的自訂心得...</div>';
             }
             
             loadPostcardPhoto();
