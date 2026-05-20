@@ -1396,7 +1396,7 @@
                                 ${(data.food || []).map((f, i) => `
                                     <div class="group p-5 bg-gradient-to-br from-amber-50 to-white rounded-3xl border border-amber-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-32 rounded-2xl bg-rose-50 mb-4 overflow-hidden relative">
-                                            <img crossorigin="anonymous" src="https://loremflickr.com/400/300/${encodeURIComponent(f.keyword || 'food')}?lock=${i + 1}" class="w-full h-full object-cover" alt="${f.name || '美食'}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'">
+                                            <img crossorigin="anonymous" src="https://loremflickr.com/400/300/${encodeURIComponent(f.keyword || 'food')},food,cuisine?lock=${i + 1}" class="w-full h-full object-cover" alt="${f.name || '美食'}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'">
                                         </div>
                                         <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
                                             <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span> ${f.name || '名稱'}
@@ -1419,7 +1419,7 @@
                                 ${(data.souvenir || []).map((s, i) => `
                                     <div class="p-5 bg-gradient-to-br from-sky-50 to-white rounded-3xl border border-sky-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-32 rounded-2xl bg-sky-50 mb-4 overflow-hidden relative">
-                                            <img crossorigin="anonymous" src="https://loremflickr.com/400/300/${encodeURIComponent(s.keyword || 'souvenir')}?lock=${i + 11}" class="w-full h-full object-cover" alt="${s.name}" onerror="this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&h=200&fit=crop'">
+                                            <img crossorigin="anonymous" src="https://loremflickr.com/400/300/${encodeURIComponent(s.keyword || 'souvenir')},souvenir,gift?lock=${i + 11}" class="w-full h-full object-cover" alt="${s.name}" onerror="this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=200&h=200&fit=crop'">
                                         </div>
                                         <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
                                             <span class="w-1.5 h-1.5 bg-sky-400 rounded-full"></span> ${s.name || '推薦'}
@@ -1442,7 +1442,7 @@
                                 ${(data.spots || []).map((s, i) => `
                                     <div class="p-5 bg-gradient-to-br from-emerald-50 to-white rounded-3xl border border-emerald-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-48 bg-emerald-50 overflow-hidden mb-4 rounded-2xl">
-                                            <img crossorigin="anonymous" src="https://loremflickr.com/600/400/${encodeURIComponent(s.keyword || 'landmark')}?lock=${i + 21}" class="w-full h-full object-cover" alt="${s.name}" onerror="this.src='https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop'">
+                                            <img crossorigin="anonymous" src="https://loremflickr.com/600/400/${encodeURIComponent(s.keyword || 'landmark')},landmark,scenery,travel?lock=${i + 21}" class="w-full h-full object-cover" alt="${s.name}" onerror="this.src='https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop'">
                                         </div>
                                         <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
                                             <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> ${s.name || '景點'}
