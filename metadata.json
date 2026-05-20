@@ -2,5 +2,5 @@
   "name": "城市旅遊規劃清單系統",
   "description": "一個美觀且實用的城市旅遊規劃工具，使用 Google Sheets 作為後端資料庫。",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
