@@ -174,10 +174,23 @@ async function startServer() {
 
       const html = await response.text();
 
-      // Find all Google high-speed cached CDN image URLs (gstatic tbn format)
-      // Example: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR...
-      const regex = /https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=tbn:[^"\s&';>]+/g;
-      const matches = html.match(regex);
+      // Find all Google high-speed cached CDN image URLs (gstatic tbn format) in actual HTML img tags first as they preserve order
+      // Example: <img ... src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR..."
+      const tagRegex = /<img[^>]+src=["'](https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=tbn:[^"'\s>]+)["']/g;
+      let matches: string[] = [];
+      let match;
+      while ((match = tagRegex.exec(html)) !== null) {
+        matches.push(match[1]);
+      }
+
+      // Fallback to general text match if no standard image tags matched
+      if (matches.length === 0) {
+        const broadRegex = /https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=tbn:[^"\s&';>]+/g;
+        const broadMatches = html.match(broadRegex);
+        if (broadMatches) {
+          matches = Array.from(broadMatches);
+        }
+      }
 
       if (matches && matches.length > 0) {
         // De-duplicate and get top 8 high-quality results

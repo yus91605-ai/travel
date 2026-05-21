@@ -1347,9 +1347,12 @@
         }
 
         // --- Vibes & Postcard Logic ---
+        let vibesSessionToken = 0;
 
         async function showVibes(city) {
             console.log('[Vibes] Showing vibes for:', city);
+            vibesSessionToken++;
+            const currentToken = vibesSessionToken;
             const modal = document.getElementById('vibesModal');
             const cityEl = document.getElementById('vibesCity');
             const contentEl = document.getElementById('vibesContent');
@@ -1396,7 +1399,7 @@
                                 ${(data.food || []).map((f, i) => `
                                     <div class="group p-5 bg-gradient-to-br from-amber-50 to-white rounded-3xl border border-amber-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-32 rounded-2xl bg-slate-100 mb-4 overflow-hidden relative">
-                                            <img id="vibe-food-${i}" crossorigin="anonymous" src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${f.name || '美食'}">
+                                            <img id="vibe-food-${i}" src="https://loremflickr.com/400/300/${encodeURIComponent(f.keyword || 'food')},food,cuisine?lock=${i + 1}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${f.name || '美食'}">
                                             <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-food-spinner-${i}">
                                                 <div class="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
                                             </div>
@@ -1422,7 +1425,7 @@
                                 ${(data.souvenir || []).map((s, i) => `
                                     <div class="p-5 bg-gradient-to-br from-sky-50 to-white rounded-3xl border border-sky-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-32 rounded-2xl bg-slate-100 mb-4 overflow-hidden relative">
-                                            <img id="vibe-souvenir-${i}" crossorigin="anonymous" src="https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&h=300&fit=crop" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
+                                            <img id="vibe-souvenir-${i}" src="https://loremflickr.com/400/300/${encodeURIComponent(s.keyword || 'souvenir')},goods,souvenir?lock=${i + 11}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&h=300&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
                                             <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-souvenir-spinner-${i}">
                                                 <div class="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
                                             </div>
@@ -1448,7 +1451,7 @@
                                 ${(data.spots || []).map((s, i) => `
                                     <div class="p-5 bg-gradient-to-br from-emerald-50 to-white rounded-3xl border border-emerald-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-48 bg-slate-100 overflow-hidden mb-4 rounded-2xl relative">
-                                            <img id="vibe-spot-${i}" crossorigin="anonymous" src="https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
+                                            <img id="vibe-spot-${i}" src="https://loremflickr.com/600/400/${encodeURIComponent(s.keyword || 'landmark')},scenery,view?lock=${i + 21}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
                                             <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-spot-spinner-${i}">
                                                 <div class="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                                             </div>
@@ -1474,6 +1477,10 @@
                         const searchRes = await fetch(`/api/image-search?q=${encodeURIComponent(queryTerm)}`);
                         if (searchRes.ok) {
                             const searchData = await searchRes.json();
+                            if (vibesSessionToken !== currentToken) {
+                                console.log('[Vibes] Switched city, ignoring old image request for:', queryTerm);
+                                return;
+                            }
                             if (searchData.success && searchData.images && searchData.images.length > 0) {
                                 const targetImg = document.getElementById(imgId);
                                 if (targetImg) {
@@ -1484,9 +1491,11 @@
                     } catch (err) {
                         console.warn('Failed to load Google image for:', queryTerm, err);
                     } finally {
-                        const spinner = document.getElementById(spinnerId);
-                        if (spinner) {
-                            spinner.classList.add('hidden');
+                        if (vibesSessionToken === currentToken) {
+                            const spinner = document.getElementById(spinnerId);
+                            if (spinner) {
+                                spinner.classList.add('hidden');
+                            }
                         }
                     }
                 };
