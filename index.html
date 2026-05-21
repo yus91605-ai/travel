@@ -387,7 +387,7 @@
                             <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                                 <i data-lucide="palette" class="w-3.5 h-3.5 text-indigo-500"></i> STEP 2. 選擇精美風格
                             </label>
-                            <div class="grid grid-cols-8 gap-1.5">
+                            <div class="grid grid-cols-5 sm:grid-cols-9 gap-1.5">
                                 <button onclick="changePostTheme('default')" title="甜心馬卡龍" class="w-full aspect-square rounded-xl bg-rose-100 border-2 border-white shadow-sm hover:scale-105 active:scale-95 transition-all outline-none focus:border-indigo-400"></button>
                                 <button onclick="changePostTheme('sky')" title="清晨天空" class="w-full aspect-square rounded-xl bg-sky-100 border-2 border-white shadow-sm hover:scale-105 active:scale-95 transition-all outline-none focus:border-indigo-400"></button>
                                 <button onclick="changePostTheme('emerald')" title="抹茶花園" class="w-full aspect-square rounded-xl bg-emerald-100 border-2 border-white shadow-sm hover:scale-105 active:scale-95 transition-all outline-none focus:border-indigo-400"></button>
@@ -396,7 +396,15 @@
                                 <button onclick="changePostTheme('vintage')" title="復古筆記" class="w-full aspect-square rounded-xl bg-amber-50 border-2 border-white shadow-sm hover:scale-105 active:scale-95 transition-all outline-none focus:border-indigo-400"></button>
                                 <button onclick="changePostTheme('dots')" title="波點派對" class="w-full aspect-square rounded-xl bg-slate-200 border-2 border-white shadow-sm hover:scale-105 active:scale-95 transition-all outline-none focus:border-indigo-400 flex items-center justify-center"><i data-lucide="circle-dot" class="w-3.5 h-3.5 text-slate-600"></i></button>
                                 <button onclick="changePostTheme('map')" title="世界地圖" class="w-full aspect-square rounded-xl bg-slate-800 border-2 border-white shadow-sm hover:scale-105 active:scale-95 transition-all outline-none focus:border-indigo-400 flex items-center justify-center"><i data-lucide="globe" class="w-3.5 h-3.5 text-white"></i></button>
+                                <button onclick="triggerPostcardCustomBgUpload()" id="customBgThemeBtn" title="上傳自訂相片背景" class="w-full aspect-square rounded-xl bg-indigo-50 border-2 border-slate-300 border-dashed hover:border-indigo-400 hover:bg-indigo-100/30 text-indigo-700 transition-all outline-none flex flex-col items-center justify-center relative cursor-pointer group">
+                                    <i data-lucide="image-up" class="w-4 h-4"></i>
+                                    <span class="text-[8px] font-black mt-0.5 scale-90">自訂</span>
+                                    <div id="customBgThemeIndicator" class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-indigo-600 rounded-full border border-white hidden flex items-center justify-center shadow-sm">
+                                        <i data-lucide="check" class="w-2.5 h-2.5 text-white"></i>
+                                    </div>
+                                </button>
                             </div>
+                            <input type="file" id="postcardCustomBgInput" accept="image/*" class="hidden" onchange="handlePostcardCustomBgUpload(event)">
                         </div>
 
                         <div class="space-y-1.5 border-t border-slate-100 pt-3">
@@ -651,59 +659,9 @@
             }
         }
 
-        function updatePostcardPreview() {
-            const select = document.getElementById('postcardSelect');
-            const id = select.value;
-            if (!id) {
-                document.getElementById('prevPostCity').innerText = '探索世界';
-                document.getElementById('prevPostDate').innerText = '即將出發';
-                document.getElementById('prevPostWeather').innerText = '預備好心情';
-                document.getElementById('prevPostHighlights').innerHTML = '<div class="font-handwriting">• 開始規劃您的精彩人生行程</div>';
-                const messageInput = document.getElementById('postcardMessageInput');
-                if (messageInput) messageInput.value = '';
-                loadPostcardPhoto();
-                return;
-            }
-
-            const trip = travelData.find(t => t.ID === id);
-            if (!trip) {
-                console.warn('Trip not found for id:', id);
-                loadPostcardPhoto();
-                return;
-            }
-
-            document.getElementById('prevPostCity').innerText = trip['城市'];
-            document.getElementById('prevPostDate').innerText = trip['日期'] || 'Adventure Awaits';
-            document.getElementById('prevPostWeather').innerText = trip['氣候'] || '美好的一天';
-            
-            const messageInput = document.getElementById('postcardMessageInput');
-            let savedMessage = localStorage.getItem('postcard_message_' + id);
-            
-            // If first time and empty, let's pre-populate a warm local message containing their destination (not AI generated, but manually editable)
-            if (savedMessage === null) {
-                savedMessage = `今天來到了 ${trip['城市']}！\n漫步在街頭感受這裡獨特的氣息，看著美麗的風景。\n每一個轉角都是驚喜，這場旅行真叫人難忘！💖`;
-                localStorage.setItem('postcard_message_' + id, savedMessage);
-            }
-            
-            if (messageInput) {
-                messageInput.value = savedMessage;
-            }
-
-            const highlights = document.getElementById('prevPostHighlights');
-            if (savedMessage.trim()) {
-                const lines = savedMessage.split('\n');
-                highlights.innerHTML = lines.map(l => `<div class="leading-relaxed font-handwriting select-none whitespace-pre-wrap break-all">${l}</div>`).join('');
-            } else {
-                highlights.innerHTML = '<div class="text-slate-400/80 italic">在此寫下您的自訂心得...</div>';
-            }
-            
-            loadPostcardPhoto();
-            
-            if (window.lucide) lucide.createIcons();
-        }
-
-        function changePostTheme(theme) {
+        function applyPostTheme(theme) {
             const preview = document.getElementById('postcardPreview');
+            if (!preview) return;
             
             // Clean up previous image-based theme styles
             preview.style.backgroundColor = '#fff';
@@ -711,6 +669,15 @@
             preview.style.backgroundPosition = 'center';
             preview.style.color = 'inherit'; // Reset color if any theme changed it
             
+            // Find targets for color adjustments
+            const headerEl = document.getElementById('prevPostCity');
+            const highlightEl = document.getElementById('prevPostHighlights');
+            const dateEl = document.getElementById('prevPostDate');
+            const weatherEl = document.getElementById('prevPostWeather');
+
+            const select = document.getElementById('postcardSelect');
+            const id = select ? select.value : '';
+
             const themeConfigs = {
                 'default': {
                     bg: 'radial-gradient(circle at 100% 150%, #fff1f2 24%, #fff 25%), radial-gradient(circle at 0% 150%, #f0f9ff 24%, #fff 25%)',
@@ -742,35 +709,203 @@
                     name: '波點派對'
                 },
                 'map': {
-                    bg: 'linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.8)), url("https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800")',
+                    bg: 'linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.75)), url("https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800")',
                     dark: true,
                     name: '深邃世界'
+                },
+                'custom': {
+                    bg: 'rgba(248, 250, 252, 0.95)',
+                    name: '自訂相片背景'
                 }
             };
 
             const config = themeConfigs[theme] || themeConfigs['default'];
-            preview.style.backgroundImage = config.bg;
-            if (config.size) preview.style.backgroundSize = config.size;
             
-            // Handle dark themes
-            const textElements = [
-                document.getElementById('prevPostCity'),
-                document.getElementById('prevPostHighlights')
-            ];
-            
-            if (config.dark) {
-                preview.classList.add('text-white');
-                textElements[0].classList.replace('text-slate-800', 'text-white');
-                textElements[1].classList.replace('text-slate-600', 'text-slate-100');
+            if (theme === 'custom' && id) {
+                const customBg = localStorage.getItem('postcard_custom_bg_' + id);
+                if (customBg) {
+                    // Accessiblity overlay so handwritten messages remain clear 
+                    preview.style.backgroundImage = `linear-gradient(rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.6)), url("${customBg}")`;
+                    config.dark = false;
+                } else {
+                    preview.style.backgroundImage = config.bg;
+                }
             } else {
-                preview.classList.remove('text-white');
-                textElements[0].classList.add('text-slate-800');
-                textElements[0].classList.remove('text-white');
-                textElements[1].classList.add('text-slate-600');
-                textElements[1].classList.remove('text-slate-100');
+                preview.style.backgroundImage = config.bg;
             }
 
-            showToast(`已切換至 ${config.name}`);
+            if (config.size) preview.style.backgroundSize = config.size;
+            
+            // Robust Text Contrast Enhancer
+            if (config.dark) {
+                preview.classList.add('text-white');
+                if (headerEl) {
+                    headerEl.style.color = '#ffffff';
+                    headerEl.classList.add('text-white');
+                }
+                if (highlightEl) {
+                    highlightEl.style.color = '#f1f5f9';
+                    highlightEl.classList.add('text-slate-100');
+                }
+                if (dateEl) dateEl.style.color = '#e2e8f0';
+                if (weatherEl) weatherEl.style.color = '#e2e8f0';
+            } else {
+                preview.classList.remove('text-white');
+                if (headerEl) {
+                    headerEl.style.color = '';
+                    headerEl.classList.remove('text-white');
+                    headerEl.classList.add('text-slate-800');
+                }
+                if (highlightEl) {
+                    highlightEl.style.color = '';
+                    highlightEl.classList.remove('text-slate-100');
+                    highlightEl.classList.add('text-slate-600');
+                }
+                if (dateEl) dateEl.style.color = '';
+                if (weatherEl) weatherEl.style.color = '';
+            }
+
+            // Sync selections of STEP 2 Style Grid
+            const buttons = document.querySelectorAll('[onclick^="changePostTheme"]');
+            buttons.forEach(btn => {
+                btn.classList.remove('ring-4', 'ring-indigo-500');
+            });
+            const customBtn = document.getElementById('customBgThemeBtn');
+            if (customBtn) customBtn.classList.remove('ring-4', 'ring-indigo-500');
+
+            const indexMap = {
+                'default': 0, 'sky': 1, 'emerald': 2, 'violet': 3,
+                'sunset': 4, 'vintage': 5, 'dots': 6, 'map': 7
+            };
+
+            if (theme === 'custom') {
+                if (customBtn) customBtn.classList.add('ring-4', 'ring-indigo-500');
+                const indicator = document.getElementById('customBgThemeIndicator');
+                if (indicator) indicator.classList.remove('hidden');
+            } else {
+                const idx = indexMap[theme];
+                if (idx !== undefined && buttons[idx]) {
+                    buttons[idx].classList.add('ring-4', 'ring-indigo-500');
+                }
+                const indicator = document.getElementById('customBgThemeIndicator');
+                if (indicator) indicator.classList.add('hidden');
+            }
+        }
+
+        function triggerPostcardCustomBgUpload() {
+            const select = document.getElementById('postcardSelect');
+            if (select && !select.value) {
+                showToast('請先選擇行程，再上傳自訂背景哦！', 'alert-circle');
+                return;
+            }
+            document.getElementById('postcardCustomBgInput').click();
+        }
+
+        function handlePostcardCustomBgUpload(event) {
+            const select = document.getElementById('postcardSelect');
+            const id = select.value;
+            if (!id) {
+                showToast('請先選擇行程，再上傳自訂背景哦！', 'alert-circle');
+                if (event.target) event.target.value = '';
+                return;
+            }
+
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('背景照片檔案過大，請選擇小於 5MB 的照片！', 'alert-circle');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                try {
+                    localStorage.setItem('postcard_custom_bg_' + id, base64Data);
+                    localStorage.setItem('postcard_theme_choice_' + id, 'custom');
+                    showToast('自訂背景照片上傳並套用成功！');
+                    changePostTheme('custom');
+                } catch (err) {
+                    console.error('Storage error for custom bg:', err);
+                    showToast('照片處理失敗，建議換張較小尺寸的圖片。', 'alert-circle');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updatePostcardPreview() {
+            const select = document.getElementById('postcardSelect');
+            const id = select.value;
+            if (!id) {
+                document.getElementById('prevPostCity').innerText = '探索世界';
+                document.getElementById('prevPostDate').innerText = '即將出發';
+                document.getElementById('prevPostWeather').innerText = '預備好心情';
+                document.getElementById('prevPostHighlights').innerHTML = '<div class="font-handwriting">• 開始規劃您的精彩人生行程</div>';
+                const messageInput = document.getElementById('postcardMessageInput');
+                if (messageInput) messageInput.value = '';
+                loadPostcardPhoto();
+                applyPostTheme('default');
+                return;
+            }
+
+            const trip = travelData.find(t => t.ID === id);
+            if (!trip) {
+                console.warn('Trip not found for id:', id);
+                loadPostcardPhoto();
+                return;
+            }
+
+            document.getElementById('prevPostCity').innerText = trip['城市'];
+            document.getElementById('prevPostDate').innerText = trip['日期'] || 'Adventure Awaits';
+            document.getElementById('prevPostWeather').innerText = trip['氣候'] || '美好的一天';
+            
+            const messageInput = document.getElementById('postcardMessageInput');
+            let savedMessage = localStorage.getItem('postcard_message_' + id);
+            
+            // If first time and empty, let's pre-populate a warm local message containing their destination
+            if (savedMessage === null) {
+                savedMessage = `今天來到了 ${trip['城市']}！\n漫步在街頭感受這裡獨特的氣息，看著美麗的風景。\n每一個轉角都是驚喜，這場旅行真叫人難忘！💖`;
+                localStorage.setItem('postcard_message_' + id, savedMessage);
+            }
+            
+            if (messageInput) {
+                messageInput.value = savedMessage;
+            }
+
+            const highlights = document.getElementById('prevPostHighlights');
+            if (savedMessage.trim()) {
+                const lines = savedMessage.split('\n');
+                highlights.innerHTML = lines.map(l => `<div class="leading-relaxed font-handwriting select-none whitespace-pre-wrap break-all">${l}</div>`).join('');
+            } else {
+                highlights.innerHTML = '<div class="text-slate-400/80 italic">在此寫下您的自訂心得...</div>';
+            }
+            
+            loadPostcardPhoto();
+
+            // Charge and apply persistent styles corresponding to current trip ID
+            const savedTheme = localStorage.getItem('postcard_theme_choice_' + id) || 'default';
+            applyPostTheme(savedTheme);
+            
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function changePostTheme(theme) {
+            const select = document.getElementById('postcardSelect');
+            const id = select ? select.value : '';
+            if (id) {
+                localStorage.setItem('postcard_theme_choice_' + id, theme);
+            }
+            
+            applyPostTheme(theme);
+            
+            const themeConfigs = {
+                'default': '甜心馬卡龍', 'sky': '清晨天空', 'emerald': '抹茶花園',
+                'violet': '晚安薰衣草', 'sunset': '落日餘暉', 'vintage': '復古筆記',
+                'dots': '波點派對', 'map': '深邃世界', 'custom': '自訂相片背景'
+            };
+            showToast(`已切換至 ${themeConfigs[theme] || '自訂風格'}`);
         }
 
         function loadPostcardPhoto() {
@@ -1399,7 +1534,7 @@
                                 ${(data.food || []).map((f, i) => `
                                     <div class="group p-5 bg-gradient-to-br from-amber-50 to-white rounded-3xl border border-amber-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-32 rounded-2xl bg-slate-100 mb-4 overflow-hidden relative">
-                                            <img id="vibe-food-${i}" src="https://loremflickr.com/400/300/${encodeURIComponent(f.keyword || 'food')},food,cuisine?lock=${i + 1}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${f.name || '美食'}">
+                                            <img id="vibe-food-${i}" src="https://images.unsplash.com/featured/400x300/?${encodeURIComponent(cityEn)},${encodeURIComponent(f.keyword || 'gourmet-gourmand')}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${f.name || '美食'}">
                                             <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-food-spinner-${i}">
                                                 <div class="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
                                             </div>
@@ -1425,7 +1560,7 @@
                                 ${(data.souvenir || []).map((s, i) => `
                                     <div class="p-5 bg-gradient-to-br from-sky-50 to-white rounded-3xl border border-sky-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-32 rounded-2xl bg-slate-100 mb-4 overflow-hidden relative">
-                                            <img id="vibe-souvenir-${i}" src="https://loremflickr.com/400/300/${encodeURIComponent(s.keyword || 'souvenir')},goods,souvenir?lock=${i + 11}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&h=300&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
+                                            <img id="vibe-souvenir-${i}" src="https://images.unsplash.com/featured/400x300/?${encodeURIComponent(cityEn)},${encodeURIComponent(s.keyword || 'craft')}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&h=300&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
                                             <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-souvenir-spinner-${i}">
                                                 <div class="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
                                             </div>
@@ -1451,7 +1586,7 @@
                                 ${(data.spots || []).map((s, i) => `
                                     <div class="p-5 bg-gradient-to-br from-emerald-50 to-white rounded-3xl border border-emerald-100/50 shadow-sm transition-all hover:shadow-md">
                                         <div class="w-full h-48 bg-slate-100 overflow-hidden mb-4 rounded-2xl relative">
-                                            <img id="vibe-spot-${i}" src="https://loremflickr.com/600/400/${encodeURIComponent(s.keyword || 'landmark')},scenery,view?lock=${i + 21}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
+                                            <img id="vibe-spot-${i}" src="https://images.unsplash.com/featured/600x400/?${encodeURIComponent(cityEn)},${encodeURIComponent(s.keyword || 'scenery-travel')}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
                                             <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-spot-spinner-${i}">
                                                 <div class="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
                                             </div>
@@ -1570,7 +1705,8 @@
             showItinerary, closeModal, showVibes, closeVibes, showPostcard, closePostcard,
             updatePostcardPreview, downloadPostcard, changePostTheme,
             validateInputs, goToPostcard, switchTab,
-            handlePostcardPhotoUpload, clearPostcardPhoto
+            handlePostcardPhotoUpload, clearPostcardPhoto,
+            triggerPostcardCustomBgUpload, handlePostcardCustomBgUpload
         });
 
         // Initialize UI
