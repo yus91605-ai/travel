@@ -149,6 +149,51 @@ async function startServer() {
     }
   });
 
+  // Real Google Image Search Proxy Route
+  apiRouter.get('/image-search', async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.status(400).json({ error: 'Missing query parameter "q"' });
+      }
+
+      console.log('[Server] Google Image search initiated for:', query);
+      const url = `https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`;
+
+      // Simulate standard modern browser UA to receive correct CDN formats
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+          'Accept-Language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Google Search responded with status: ${response.status}`);
+      }
+
+      const html = await response.text();
+
+      // Find all Google high-speed cached CDN image URLs (gstatic tbn format)
+      // Example: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR...
+      const regex = /https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=tbn:[^"\s&';>]+/g;
+      const matches = html.match(regex);
+
+      if (matches && matches.length > 0) {
+        // De-duplicate and get top 8 high-quality results
+        const uniqueImages = Array.from(new Set(matches)).slice(0, 8);
+        console.log(`[Server] Image search success. Found ${uniqueImages.length} images for query: "${query}"`);
+        return res.json({ success: true, images: uniqueImages });
+      }
+
+      console.warn('[Server] No gstatic image sources matched in Google payload');
+      return res.json({ success: false, message: 'No matches found', images: [] });
+    } catch (err: any) {
+      console.error('[Server] Google Search scraper failed:', err);
+      return res.status(500).json({ success: false, error: err.message, images: [] });
+    }
+  });
+
   apiRouter.get('/travel', (req, res) => {
     console.log('[Server] GET /api/travel');
     try {
