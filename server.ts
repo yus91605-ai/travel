@@ -116,14 +116,18 @@ async function startServer() {
       const { city } = req.body;
       const ai = getGeminiClient();
 
-      const prompt = `你是一位旅遊專家，請為「${city}」這個城市提供一份深度「在地靈感指南」。
-      請挖掘一些當地人才知道的秘境或特色，不要只給大眾景點。
+      const prompt = `你是一位深具「文青、在地探索、不走馬看花」美學眼光的獨立旅行家與旅遊作家。請為「${city}」這個地方/城市/國家深度量身打造一份專屬的「在地靈感指南」。
+      
+      請依循以下的核心精神：
+      1. 文青與在地探索風格：文筆具有溫度與質感，描述時能點出物件背後的故事、溫度、文化本質或街角的職人精神，避免流於俗套與商業化的大眾觀光標籤。
+      2. 深入地方脈絡：挖掘唯有深度漫步者、當地人才知道的隱藏美味、歷史工藝或低調迷人的小眾角落（例如獨立書店、深夜咖啡、小農職人坊、未經人工雕琢的自然祕境或社區聚落）。
+      3. 精準圖文相符（極重要）：為了確保前端搭配 Google 圖片搜尋及 Unsplash 圖片時「圖文完全相符」，在產出 "keyword" 時必須使用「精準、具象、高視覺特徵、能在英文搜尋中 100% 正確匹配」的字詞組合。切忌使用籠統字眼（如 "food"、"market"、"beautiful"），應使用具備該地名與具體事物特徵的組合，如 "honduras baleada street food", "honduras copan ruins stela"。
       
       請包含：
-      1. 該城市的英文名稱 (例如台北為 Taipei、京都為 Kyoto 等)。
-      2. 必吃美食 (3個)：名稱、一段簡短誘人的描述、該食物的一個英文關鍵字(用於搜圖)。
-      3. 特色紀念品 (2個)：名稱、推薦理由、該項目的一個英文關鍵字(用於搜圖)。
-      4. 秘境景點 (2個)：名稱、為什麼它是秘境、最佳拍攝時間點或小撇步、該景點的一個英文關鍵字(用於搜圖)。
+      1. 該城市/地方的英文名稱 (例如台北為 Taipei、京都為 Kyoto、宏都拉斯為 Honduras 等)。
+      2. 必吃在地美食 (3個)：名稱、一段簡短文青誘人的故事性描述、該食物精準的英文關鍵字（格式為: "地點+具體食物名"，例如 "honduras baleadas"）。
+      3. 特色在地代表物/紀念品 (2個)：名稱、兼具深度與文青感的推薦理由、該項目精準的英文關鍵字（格式為: "地點+具體事物名"，例如 "honduras clay pottery" 或 "honduras lenca textile"）。
+      4. 慢活秘境/私房景點 (2個)：名稱、為什麼它是秘境/故事/文化價值、漫步旅行小撇步、該景點精準的英文關鍵字（格式為: "地點+具體景點名"，例如 "copan ruins archaeological site" 或 "pulhapanzak waterfall honduras"）。
       
       請以繁體中文回答，並以 JSON 格式回傳，格式如下：
       {
@@ -174,23 +178,16 @@ async function startServer() {
 
       const html = await response.text();
 
-      // Find all Google high-speed cached CDN image URLs (gstatic tbn format) in actual HTML img tags first as they preserve order
-      // Example: <img ... src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR..."
-      const tagRegex = /<img[^>]+src=["'](https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=tbn:[^"'\s>]+)["']/g;
-      let matches: string[] = [];
-      let match;
-      while ((match = tagRegex.exec(html)) !== null) {
-        matches.push(match[1]);
-      }
+      // Clean, extremely robust regex matching for all gstatic CDN subdomains (encrypted-tbn0..9, tbn0..9, etc.)
+      // Matches both standard HTML URLs and escaped backslash JSON/JS sequence URLs, either http or https.
+      const broadRegex = /https?:\/\/[^"'\s\>\/]*gstatic\.com\/images\?q=tbn:[^"'\s\>&;]+/gi;
+      const broadMatches = html.match(broadRegex) || [];
 
-      // Fallback to general text match if no standard image tags matched
-      if (matches.length === 0) {
-        const broadRegex = /https:\/\/encrypted-tbn0\.gstatic\.com\/images\?q=tbn:[^"\s&';>]+/g;
-        const broadMatches = html.match(broadRegex);
-        if (broadMatches) {
-          matches = Array.from(broadMatches);
-        }
-      }
+      const escapedRegex = /https?:\\\/\\\/[^"'\s\>\\\/]*gstatic\.com\\\/images\?q=tbn:[^"'\s\>\\&;]+/gi;
+      const escapedMatches = html.match(escapedRegex) || [];
+      const cleanEscapedMatches = escapedMatches.map(m => m.replace(/\\/g, ''));
+
+      let matches = [...broadMatches, ...cleanEscapedMatches];
 
       if (matches && matches.length > 0) {
         // De-duplicate and get top 8 high-quality results

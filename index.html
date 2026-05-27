@@ -1533,12 +1533,6 @@
                             <div class="grid grid-cols-1 gap-4">
                                 ${(data.food || []).map((f, i) => `
                                     <div class="group p-5 bg-gradient-to-br from-amber-50 to-white rounded-3xl border border-amber-100/50 shadow-sm transition-all hover:shadow-md">
-                                        <div class="w-full h-32 rounded-2xl bg-slate-100 mb-4 overflow-hidden relative">
-                                            <img id="vibe-food-${i}" src="https://images.unsplash.com/featured/400x300/?${encodeURIComponent(cityEn)},${encodeURIComponent(f.keyword || 'gourmet-gourmand')}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${f.name || '美食'}">
-                                            <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-food-spinner-${i}">
-                                                <div class="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-                                            </div>
-                                        </div>
                                         <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
                                             <span class="w-1.5 h-1.5 bg-amber-400 rounded-full"></span> ${f.name || '名稱'}
                                         </p>
@@ -1559,12 +1553,6 @@
                             <div class="grid grid-cols-1 gap-4">
                                 ${(data.souvenir || []).map((s, i) => `
                                     <div class="p-5 bg-gradient-to-br from-sky-50 to-white rounded-3xl border border-sky-100/50 shadow-sm transition-all hover:shadow-md">
-                                        <div class="w-full h-32 rounded-2xl bg-slate-100 mb-4 overflow-hidden relative">
-                                            <img id="vibe-souvenir-${i}" src="https://images.unsplash.com/featured/400x300/?${encodeURIComponent(cityEn)},${encodeURIComponent(s.keyword || 'craft')}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=400&h=300&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
-                                            <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-souvenir-spinner-${i}">
-                                                <div class="w-5 h-5 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-                                            </div>
-                                        </div>
                                         <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
                                             <span class="w-1.5 h-1.5 bg-sky-400 rounded-full"></span> ${s.name || '推薦'}
                                         </p>
@@ -1585,12 +1573,6 @@
                             <div class="grid grid-cols-1 gap-4">
                                 ${(data.spots || []).map((s, i) => `
                                     <div class="p-5 bg-gradient-to-br from-emerald-50 to-white rounded-3xl border border-emerald-100/50 shadow-sm transition-all hover:shadow-md">
-                                        <div class="w-full h-48 bg-slate-100 overflow-hidden mb-4 rounded-2xl relative">
-                                            <img id="vibe-spot-${i}" src="https://images.unsplash.com/featured/600x400/?${encodeURIComponent(cityEn)},${encodeURIComponent(s.keyword || 'scenery-travel')}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&h=400&fit=crop';" class="w-full h-full object-cover transition-all duration-550 ease-in-out" alt="${s.name}">
-                                            <div class="absolute inset-0 bg-black/5 flex items-center justify-center pointer-events-none" id="vibe-spot-spinner-${i}">
-                                                <div class="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                                            </div>
-                                        </div>
                                         <p class="font-black text-slate-800 flex items-center gap-2 mb-2">
                                             <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full"></span> ${s.name || '景點'}
                                         </p>
@@ -1605,46 +1587,6 @@
                         </section>
                     </div>
                 `;
-
-                // Real-time asynchronous Google Search image fetcher helper
-                const loadRealGoogleImage = async (queryTerm, imgId, spinnerId) => {
-                    try {
-                        const searchRes = await fetch(`/api/image-search?q=${encodeURIComponent(queryTerm)}`);
-                        if (searchRes.ok) {
-                            const searchData = await searchRes.json();
-                            if (vibesSessionToken !== currentToken) {
-                                console.log('[Vibes] Switched city, ignoring old image request for:', queryTerm);
-                                return;
-                            }
-                            if (searchData.success && searchData.images && searchData.images.length > 0) {
-                                const targetImg = document.getElementById(imgId);
-                                if (targetImg) {
-                                    targetImg.src = searchData.images[0];
-                                }
-                            }
-                        }
-                    } catch (err) {
-                        console.warn('Failed to load Google image for:', queryTerm, err);
-                    } finally {
-                        if (vibesSessionToken === currentToken) {
-                            const spinner = document.getElementById(spinnerId);
-                            if (spinner) {
-                                spinner.classList.add('hidden');
-                            }
-                        }
-                    }
-                };
-
-                // Trigger real-time fetches with localized contextual terms
-                (data.food || []).forEach((f, i) => {
-                    loadRealGoogleImage(`${city} ${f.name}`, `vibe-food-${i}`, `vibe-food-spinner-${i}`);
-                });
-                (data.souvenir || []).forEach((s, i) => {
-                    loadRealGoogleImage(`${city} ${s.name}`, `vibe-souvenir-${i}`, `vibe-souvenir-spinner-${i}`);
-                });
-                (data.spots || []).forEach((s, i) => {
-                    loadRealGoogleImage(`${city} ${s.name}`, `vibe-spot-${i}`, `vibe-spot-spinner-${i}`);
-                });
 
                 if (window.lucide) lucide.createIcons();
             } catch (error) {
