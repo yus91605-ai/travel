@@ -100,6 +100,28 @@
             color: #9ca3af;
             transform: rotate(5deg);
         }
+        /* Equalizer Bouncing Bars Animation */
+        @keyframes bounce-bar-1 {
+            0%, 100% { height: 3px; }
+            50% { height: 11px; }
+        }
+        @keyframes bounce-bar-2 {
+            0%, 100% { height: 9px; }
+            50% { height: 4px; }
+        }
+        @keyframes bounce-bar-3 {
+            0%, 100% { height: 4px; }
+            50% { height: 10px; }
+        }
+        .animate-bar-1 {
+            animation: bounce-bar-1 0.7s ease-in-out infinite;
+        }
+        .animate-bar-2 {
+            animation: bounce-bar-2 0.5s ease-in-out infinite;
+        }
+        .animate-bar-3 {
+            animation: bounce-bar-3 0.8s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -437,6 +459,70 @@
                             <textarea id="postcardMessageInput" oninput="handlePostcardMessageInput(event)" rows="3" maxlength="150" placeholder="在此寫下您的個人旅遊隨筆、心得與感動點滴...（本文字不會經由 AI 修改，完美保留您的真實回憶）" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-medium text-slate-700 resize-none"></textarea>
                         </div>
 
+                        <!-- STEP 5. Music & Ambience -->
+                        <div class="space-y-1.5 border-t border-slate-100 pt-3">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="music" class="w-3.5 h-3.5 text-indigo-500"></i> STEP 5. 搭配暖心旅人音樂 (MUSIC & BGM)
+                            </label>
+                            <div class="flex gap-2">
+                                <select id="postcardBgmSelect" onchange="handlePostcardBgmChange()" class="flex-1 px-3 py-2 bg-white border border-slate-250 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
+                                    <option value="none">🔇 靜音 (無旅人背景音樂)</option>
+                                    <option value="guitar">☕ 塞納河畔 · 吉他 Lofi</option>
+                                    <option value="train">🚂 阿爾卑斯 · 慢行鐵路拍子</option>
+                                    <option value="ocean">🌊 沖繩蔚藍 · 夏日潮汐浪鳴</option>
+                                    <option value="piano">🌌 冰島夜空 · 漫步星空鋼琴</option>
+                                    <option value="campfire">⛺ 輕井澤 · 溫暖營火柴燃</option>
+                                    <option value="custom">📁 自訂上傳音訊檔案 (.mp3)</option>
+                                </select>
+                                <button id="postcardBgmPlayBtn" onclick="togglePostcardAudioPlayState()" class="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all shadow-sm group relative" title="播放/暫停">
+                                    <i data-lucide="play" id="bgmPlayIcon" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <input type="file" id="postcardCustomBgmInput" accept="audio/*" class="hidden" onchange="handlePostcardCustomBgmUpload(event)">
+                            <div id="customBgmNameIndicator" class="hidden text-[10px] text-indigo-600 font-semibold bg-indigo-55 px-2 py-1 rounded-lg truncate"></div>
+                            
+                            <!-- Volume slider -->
+                            <div id="bgmVolumeControl" class="flex items-center gap-2 mt-1.5 px-1 hidden">
+                                <i data-lucide="volume-2" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <input type="range" id="bgmVolumeSlider" min="0" max="1" step="0.1" value="0.5" oninput="handleBgmVolumeChange(event)" class="w-24 h-1 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600">
+                                <span class="text-[9px] text-slate-400 font-mono font-bold" id="bgmVolumeValue">50%</span>
+                            </div>
+                        </div>
+
+                        <!-- STEP 6. Scenic Motion Video Effects -->
+                        <div class="space-y-1.5 border-t border-slate-100 pt-3">
+                            <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                                <i data-lucide="video" class="w-3.5 h-3.5 text-indigo-500"></i> STEP 6. 動態實景影片特效 (MOTION VIDEO)
+                            </label>
+                            <select id="postcardVideoBgSelect" onchange="handlePostcardVideoBgChange()" class="w-full px-3 py-2 bg-white border border-slate-250 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 text-xs font-semibold text-slate-700">
+                                <option value="none">🖼️ 關閉動態特效 (純靜態紙美感)</option>
+                                <option value="kyoto">🌸 京都 · 浪漫漫櫻吹雪效果</option>
+                                <option value="aurora">🌌 北歐 · 極地奧妙歐若拉星空</option>
+                                <option value="rain">🌧️ 巴黎 · 左岸文藝雨滴窗扉</option>
+                                <option value="clouds">✈️ 藍天 · 萬呎高空迎風雲海</option>
+                                <option value="train_scenic">🚞 瑞士 · 穿梭翠綠林間鐵道</option>
+                            </select>
+                            
+                            <div class="mt-2">
+                                <div id="videoDropzone" class="relative group border border-dashed border-slate-300 rounded-xl p-2.5 text-center cursor-pointer bg-white hover:border-indigo-400 hover:bg-indigo-50/10 transition-all flex flex-col items-center justify-center min-h-[50px]" onclick="document.getElementById('postcardVideoInput').click()">
+                                    <input type="file" id="postcardVideoInput" accept="video/*" class="hidden" onchange="handlePostcardVideoUpload(event)">
+                                    <div id="videoDropzonePrompt" class="flex items-center gap-2">
+                                        <i data-lucide="video-off" id="videoPromptIcon" class="w-4 h-4 text-slate-400 group-hover:text-indigo-500"></i>
+                                        <p class="text-[10px] font-bold text-slate-600">上傳自訂拍立得動態影片 (.mp4)</p>
+                                    </div>
+                                    <div id="videoDropzonePreview" class="hidden w-full flex items-center justify-between px-2">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="clapperboard" class="w-4 h-4 text-indigo-550 text-indigo-600"></i>
+                                            <span class="text-[9px] text-indigo-600 font-bold truncate max-w-[140px]" id="uploadVideoName"></span>
+                                        </div>
+                                        <button type="button" onclick="clearPostcardVideo(event)" class="p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors shadow">
+                                            <i data-lucide="trash-2" class="w-2.5 h-2.5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="pt-1.5">
                             <button onclick="downloadPostcard(event)" class="w-full bg-slate-800 text-white px-4 py-2.5 rounded-xl font-bold hover:bg-slate-900 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-md">
                                 <i data-lucide="download" class="w-4 h-4"></i> 下載回憶明信片
@@ -459,8 +545,21 @@
                     </div>
                     
                     <div class="w-full overflow-hidden flex items-center justify-center p-1">
-                        <div id="postcardPreview" class="postcard-card w-full rounded-2xl shadow-xl p-6 md:p-8 transform transition-all duration-500 hover:rotate-1">
-                            <div class="flex flex-col md:flex-row gap-6 mt-4">
+                        <div id="postcardPreview" class="postcard-card w-full rounded-2xl shadow-xl p-6 md:p-8 transform transition-all duration-500 hover:rotate-1 relative overflow-hidden">
+                            <!-- Background Video Loop Player -->
+                            <video id="postcardBgVideo" class="absolute inset-0 w-full h-full object-cover pointer-events-none opacity-25 mix-blend-multiply hidden" autoplay muted playsinline loop></video>
+                            
+                            <!-- BGM Active Badge overlay on postcard -->
+                            <div id="postcardLiveBgmBadge" class="absolute top-4 right-18 bg-indigo-600/90 hover:bg-indigo-700 text-white rounded-full px-2.5 py-1 text-[9px] font-bold flex items-center gap-1.5 transition-all shadow-sm hidden cursor-pointer z-20 animate-pulse" onclick="togglePostcardAudioPlayState()">
+                                <div class="flex items-end gap-[2px] h-[10px] w-[12px] pb-[1px]">
+                                    <span class="bg-white w-[2px] h-full rounded-sm animate-bar-1"></span>
+                                    <span class="bg-white w-[2px] h-2/3 rounded-sm animate-bar-2"></span>
+                                    <span class="bg-white w-[2px] h-5/6 rounded-sm animate-bar-3"></span>
+                                </div>
+                                <span id="liveBgmLabel">PLAYING</span>
+                            </div>
+
+                            <div class="flex flex-col md:flex-row gap-6 mt-4 relative z-10">
                                 <div class="flex-1 space-y-6">
                                     <div>
                                         <span class="text-[10px] font-bold text-sky-600 tracking-widest uppercase mb-1 block">Travel Memory</span>
@@ -484,10 +583,11 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Polaroid photo insert inside the postcard preview -->
+                                <!-- Polaroid photo/video insert inside the postcard preview -->
                                 <div id="prevPostPhotoWrapper" class="hidden flex-col items-center justify-center bg-white p-3 pb-6 rounded-lg shadow-lg border border-slate-100 rotate-2 w-36 md:w-40 shrink-0 self-center hover:rotate-0 transition-transform duration-300">
                                     <div class="w-full aspect-square bg-slate-50 overflow-hidden relative border border-slate-150 rounded">
                                         <img id="prevPostPhotoImg" class="w-full h-full object-cover" src="" alt="Travel Remembrance">
+                                        <video id="prevPostPhotoVideo" class="hidden w-full h-full object-cover" autoplay muted playsinline loop></video>
                                     </div>
                                     <span id="prevPostPhotoCaption" class="mt-2 text-center text-[9px] font-bold text-slate-400 font-mono tracking-wider truncate max-w-full">MEMORIES</span>
                                 </div>
@@ -580,6 +680,10 @@
 
         // --- State ---
         let travelData = [];
+        let postcardAudio = null;
+        let postcardAudioPlaying = false;
+        let customAudioUrl = null;
+        let customVideoUrl = null;
         
         // --- Core Navigation ---
         function switchTab(tab) {
@@ -833,6 +937,309 @@
                 }
             };
             reader.readAsDataURL(file);
+        }
+
+        // --- STEP 5. Volume and Music (BGM) Handlers ---
+        function handlePostcardBgmChange() {
+            const select = document.getElementById('postcardBgmSelect');
+            const val = select ? select.value : 'none';
+            const volumeControl = document.getElementById('bgmVolumeControl');
+
+            // Handle custom music file upload trigger
+            if (val === 'custom') {
+                document.getElementById('postcardCustomBgmInput').click();
+                return;
+            }
+
+            // Map keys of BGM options to URLs
+            const bgmUrls = {
+                'guitar': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+                'train': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+                'ocean': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+                'piano': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+                'campfire': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3'
+            };
+
+            const url = bgmUrls[val] || null;
+            applyBgmAudio(url);
+        }
+
+        function applyBgmAudio(url) {
+            const volumeControl = document.getElementById('bgmVolumeControl');
+            
+            // Stop existing audio
+            if (postcardAudio) {
+                postcardAudio.pause();
+                postcardAudio = null;
+            }
+
+            if (!url) {
+                postcardAudioPlaying = false;
+                if (volumeControl) volumeControl.classList.add('hidden');
+                updateBgmPlayUI(false);
+                document.getElementById('postcardLiveBgmBadge').classList.add('hidden');
+                return;
+            }
+
+            try {
+                postcardAudio = new Audio(url);
+                postcardAudio.loop = true;
+                
+                // Read volume from slider
+                const slider = document.getElementById('bgmVolumeSlider');
+                const volume = slider ? parseFloat(slider.value) : 0.5;
+                postcardAudio.volume = volume;
+
+                if (volumeControl) volumeControl.classList.remove('hidden');
+
+                // Auto-play the ambience
+                postcardAudio.play().then(() => {
+                    postcardAudioPlaying = true;
+                    updateBgmPlayUI(true);
+                    showToast('氛圍背景音樂已啟動！');
+                }).catch(err => {
+                    console.log('Autoplay blocked. User can click play manually.', err);
+                    postcardAudioPlaying = false;
+                    updateBgmPlayUI(false);
+                });
+            } catch (err) {
+                console.error('Failed to play background audio:', err);
+                showToast('音樂載入失敗，可手動點擊重試。', 'alert-circle');
+            }
+        }
+
+        function togglePostcardAudioPlayState() {
+            if (!postcardAudio) {
+                const select = document.getElementById('postcardBgmSelect');
+                if (select && select.value !== 'none' && select.value !== 'custom') {
+                    handlePostcardBgmChange();
+                } else {
+                    showToast('請先在 STEP 5 選擇背景音樂哦！', 'info');
+                }
+                return;
+            }
+
+            if (postcardAudioPlaying) {
+                postcardAudio.pause();
+                postcardAudioPlaying = false;
+                updateBgmPlayUI(false);
+                showToast('音樂已暫停');
+            } else {
+                postcardAudio.play().then(() => {
+                    postcardAudioPlaying = true;
+                    updateBgmPlayUI(true);
+                    showToast('音樂播放中...');
+                }).catch(err => {
+                    console.error('Audio play failed:', err);
+                });
+            }
+        }
+
+        function handlePostcardCustomBgmUpload(event) {
+            const file = event.target.files[0];
+            const indicator = document.getElementById('customBgmNameIndicator');
+            if (!file) return;
+
+            if (customAudioUrl) {
+                URL.revokeObjectURL(customAudioUrl);
+            }
+
+            customAudioUrl = URL.createObjectURL(file);
+            
+            if (indicator) {
+                indicator.innerText = `🎵 ${file.name}`;
+                indicator.classList.remove('hidden');
+            }
+
+            showToast(`客製化音訊載入中: ${file.name}`);
+            applyBgmAudio(customAudioUrl);
+        }
+
+        function handleBgmVolumeChange(event) {
+            const vol = parseFloat(event.target.value);
+            const valText = document.getElementById('bgmVolumeValue');
+            if (valText) {
+                valText.innerText = `${Math.round(vol * 100)}%`;
+            }
+            if (postcardAudio) {
+                postcardAudio.volume = vol;
+            }
+        }
+
+        function updateBgmPlayUI(isPlaying) {
+            const playIcon = document.getElementById('bgmPlayIcon');
+            const playBtn = document.getElementById('postcardBgmPlayBtn');
+            const badge = document.getElementById('postcardLiveBgmBadge');
+            const badgeLabel = document.getElementById('liveBgmLabel');
+
+            if (isPlaying) {
+                if (playIcon) {
+                    playIcon.setAttribute('data-lucide', 'pause');
+                }
+                if (playBtn) {
+                    playBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                    playBtn.classList.add('bg-rose-500', 'hover:bg-rose-600');
+                }
+                if (badge) {
+                    badge.classList.remove('hidden');
+                    // Ensure the animated equalizer bars are visible
+                    const bars = badge.querySelectorAll('span');
+                    bars.forEach((b, idx) => b.className = `bg-white w-[2px] rounded-sm animate-bar-${idx + 1}`);
+                }
+                if (badgeLabel) badgeLabel.innerText = 'PLAYING1';
+            } else {
+                if (playIcon) {
+                    playIcon.setAttribute('data-lucide', 'play');
+                }
+                if (playBtn) {
+                    playBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                    playBtn.classList.remove('bg-rose-500', 'hover:bg-rose-600');
+                }
+                if (badge) {
+                    // Just freeze the equalizer bars
+                    const bars = badge.querySelectorAll('span');
+                    bars.forEach((b) => b.className = 'bg-white w-[2px] h-[3px] rounded-sm');
+                }
+                if (badgeLabel) badgeLabel.innerText = 'MUTED';
+            }
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // --- STEP 6. Video background & Photo Frame Video Handlers ---
+        function handlePostcardVideoBgChange() {
+            const select = document.getElementById('postcardVideoBgSelect');
+            const val = select ? select.value : 'none';
+            const bgVideo = document.getElementById('postcardBgVideo');
+
+            if (!bgVideo) return;
+
+            // Map presets to high speed stock loops
+            const videoUrls = {
+                'kyoto': 'https://assets.mixkit.co/videos/preview/mixkit-sakura-trees-with-pink-flowers-in-spring-44369-large.mp4',
+                'aurora': 'https://assets.mixkit.co/videos/preview/mixkit-aurora-borealis-illuminating-the-night-sky-40097-large.mp4',
+                'rain': 'https://assets.mixkit.co/videos/preview/mixkit-rain-drops-on-a-window-of-a-house-11599-large.mp4',
+                'clouds': 'https://assets.mixkit.co/videos/preview/mixkit-window-seat-passenger-view-of-flying-above-clouds-41527-large.mp4',
+                'train_scenic': 'https://assets.mixkit.co/videos/preview/mixkit-inside-of-a-train-passing-by-forest-trees-32777-large.mp4'
+            };
+
+            const url = videoUrls[val] || '';
+
+            if (url) {
+                bgVideo.src = url;
+                bgVideo.classList.remove('hidden');
+                bgVideo.play().catch(err => console.log('Video autoplay blocked slightly:', err));
+                showToast('已開啟動態實景特效背景！');
+            } else {
+                bgVideo.src = '';
+                bgVideo.classList.add('hidden');
+            }
+        }
+
+        function handlePostcardVideoUpload(event) {
+            const select = document.getElementById('postcardSelect');
+            const id = select.value;
+            if (!id) {
+                showToast('請先選擇行程，再上傳動態影片喔！', 'alert-circle');
+                if (event.target) event.target.value = '';
+                return;
+            }
+
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 20 * 1024 * 1024) {
+                showToast('影片檔案較大（限小於 20MB），請精製壓縮後上傳！', 'alert-circle');
+                event.target.value = '';
+                return;
+            }
+
+            if (customVideoUrl) {
+                URL.revokeObjectURL(customVideoUrl);
+            }
+
+            customVideoUrl = URL.createObjectURL(file);
+            
+            // Render video into the preview!
+            const imgEl = document.getElementById('prevPostPhotoImg');
+            const videoEl = document.getElementById('prevPostPhotoVideo');
+            const wrapper = document.getElementById('prevPostPhotoWrapper');
+
+            if (wrapper) {
+                wrapper.classList.remove('hidden');
+                wrapper.classList.add('flex');
+            }
+
+            if (imgEl) imgEl.classList.add('hidden');
+            if (videoEl) {
+                videoEl.src = customVideoUrl;
+                videoEl.classList.remove('hidden');
+                videoEl.play().catch(err => console.log('Polaroid video autoplay failed:', err));
+            }
+
+            // Show dropzone preview state
+            const prompt = document.getElementById('videoDropzonePrompt');
+            const preview = document.getElementById('videoDropzonePreview');
+            const nameLabel = document.getElementById('uploadVideoName');
+
+            if (prompt) prompt.classList.add('hidden');
+            if (preview) preview.classList.remove('hidden');
+            if (nameLabel) nameLabel.innerText = file.name;
+
+            // Try to cache state or prompt success
+            localStorage.setItem('postcard_video_name_' + id, file.name);
+            showToast('影片載入成功，已嵌入拍立得！');
+        }
+
+        function clearPostcardVideo(event) {
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+
+            const select = document.getElementById('postcardSelect');
+            const id = select.value;
+            if (!id) return;
+
+            if (customVideoUrl) {
+                URL.revokeObjectURL(customVideoUrl);
+                customVideoUrl = null;
+            }
+
+            localStorage.removeItem('postcard_video_name_' + id);
+
+            // Revert back to photo!
+            const imgEl = document.getElementById('prevPostPhotoImg');
+            const videoEl = document.getElementById('prevPostPhotoVideo');
+            const input = document.getElementById('postcardVideoInput');
+
+            if (input) input.value = '';
+
+            if (videoEl) {
+                videoEl.src = '';
+                videoEl.classList.add('hidden');
+            }
+            if (imgEl && imgEl.src && imgEl.src !== window.location.href) {
+                imgEl.classList.remove('hidden');
+                const wrapper = document.getElementById('prevPostPhotoWrapper');
+                if (wrapper) {
+                    wrapper.classList.remove('hidden');
+                    wrapper.classList.add('flex');
+                }
+            } else {
+                const wrapper = document.getElementById('prevPostPhotoWrapper');
+                if (wrapper) {
+                    wrapper.classList.add('hidden');
+                    wrapper.classList.remove('flex');
+                }
+            }
+
+            // Revert dropzone UI
+            const prompt = document.getElementById('videoDropzonePrompt');
+            const preview = document.getElementById('videoDropzonePreview');
+            if (prompt) prompt.classList.remove('hidden');
+            if (preview) preview.classList.add('hidden');
+
+            showToast('已移除客製化拍立得動態影片');
         }
 
         function updatePostcardPreview() {
@@ -1617,6 +2024,15 @@
         function closePostcard() {
             document.getElementById('postcardModal').classList.add('hidden');
             document.body.style.overflow = 'auto';
+            if (postcardAudio) {
+                postcardAudio.pause();
+                postcardAudioPlaying = false;
+                updateBgmPlayUI(false);
+            }
+            const bgVideo = document.getElementById('postcardBgVideo');
+            if (bgVideo) bgVideo.pause();
+            const photoVid = document.getElementById('prevPostPhotoVideo');
+            if (photoVid) photoVid.pause();
         }
 
         function goToPostcard(id) {
@@ -1648,7 +2064,10 @@
             updatePostcardPreview, downloadPostcard, changePostTheme,
             validateInputs, goToPostcard, switchTab,
             handlePostcardPhotoUpload, clearPostcardPhoto,
-            triggerPostcardCustomBgUpload, handlePostcardCustomBgUpload
+            triggerPostcardCustomBgUpload, handlePostcardCustomBgUpload,
+            handlePostcardBgmChange, togglePostcardAudioPlayState,
+            handlePostcardCustomBgmUpload, handleBgmVolumeChange,
+            handlePostcardVideoBgChange, handlePostcardVideoUpload, clearPostcardVideo
         });
 
         // Initialize UI
