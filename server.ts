@@ -4,7 +4,7 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +27,54 @@ function getGeminiClient(): GoogleGenAI {
       }
     }
   });
+}
+
+// 100% Reliable Automatic Retry Mechanism to counter cold starts or transient timeouts
+async function retryWithBackoff<T>(fn: () => Promise<T>, retries = 2, delay = 500): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    if (retries <= 0) throw error;
+    console.warn(`[Gemini Retry] Error occurred during API call. Retrying in ${delay}ms... remaining retries: ${retries}. Error:`, error);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return retryWithBackoff(fn, retries - 1, delay * 2);
+  }
+}
+
+// 100% Resilient parsing helper that handles Markdown code blocks, leading narrative, and formatting hiccups
+function parseJSONRobust(text: string): any {
+  if (!text) return null;
+  let cleaned = text.trim();
+  
+  // Strip Markdown code fences if present 
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(json)?/i, '').replace(/```$/, '').trim();
+  }
+  
+  try {
+    return JSON.parse(cleaned);
+  } catch (e) {
+    // Extraction strategy to pick absolute outermost JSON boundaries
+    const startBrace = cleaned.indexOf('{');
+    const endBrace = cleaned.lastIndexOf('}');
+    const startBracket = cleaned.indexOf('[');
+    const endBracket = cleaned.lastIndexOf(']');
+    
+    if (startBrace !== -1 && endBrace !== -1 && (startBracket === -1 || startBrace < startBracket)) {
+      try {
+        return JSON.parse(cleaned.substring(startBrace, endBrace + 1));
+      } catch (innerErr) {
+        console.warn('[Parser] Extraction of braced object failed:', innerErr);
+      }
+    } else if (startBracket !== -1 && endBracket !== -1) {
+      try {
+        return JSON.parse(cleaned.substring(startBracket, endBracket + 1));
+      } catch (innerErr) {
+        console.warn('[Parser] Extraction of bracketed array failed:', innerErr);
+      }
+    }
+    throw e;
+  }
 }
 
 // Initialize data files if they don't exist
@@ -70,18 +118,33 @@ async function startServer() {
       const datePrompt = date ? `在 ${date} 左右` : "在該季節";
       const daysPrompt = days ? `停留 ${days} 天` : "一趟深度旅遊";
 
-      const prompt = `你是一位專業的旅遊規劃師。請針對城市「${city}」${datePrompt}、${daysPrompt}的旅遊推薦 3-5 個必去景點，並給出一個詳細的「第一天至最後一天」行程安排。行程安排請務必使用條列式呈現（例如：Day 1: \n - 景點A \n - 景點B...），並包含預估預算（以 TWD 為單位）以及當地的氣候狀況。請以繁體中文回答，並以 JSON 格式回傳，格式如下：{"spots": "景點A、景點B...", "itinerary": "Day 1:...\\nDay 2:...", "budget": "預估金額", "weather": "氣候狀況"}`;
+      const prompt = `你是一位專業的旅遊規劃師。請針對城市「${city}」${datePrompt}、${daysPrompt}的旅遊推薦 3-5 個必去景點，並給出一個詳細的「第一天至最後一天」行程安排。
+      請注意：敘述請以繁體中文回答，為提升讀取與顯示速度，講求精練與流暢，避免長篇大論、語氣冗長口水！`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json"
-        }
+      const responseText = await retryWithBackoff(async () => {
+        const response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                spots: { type: Type.STRING, description: "景點名稱點對點，例如：景點A、景點B、景點C，請極度簡潔" },
+                itinerary: { type: Type.STRING, description: "第一天到最後一天的行程。條列呈現，例如：Day 1:\n- 景點A\n- 景點B\n\nDay 2:\n- 景點C" },
+                budget: { type: Type.STRING, description: "預估金額（新台幣 TWD 項目合計）" },
+                weather: { type: Type.STRING, description: "當地的氣候狀況與穿著建議（極度簡潔）" }
+              },
+              required: ["spots", "itinerary", "budget", "weather"]
+            },
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
+          }
+        });
+        return response.text || '{}';
       });
 
-      console.log('[Server] AI Generation successful');
-      res.json(JSON.parse(response.text || '{}'));
+      console.log('[Server] AI Generation successful (Optimized)');
+      res.json(parseJSONRobust(responseText));
     } catch (e: any) {
       console.error('[Server] AI Route Error:', e);
       res.status(500).json({ success: false, error: e.message || 'AI 規劃發生內部錯誤' });
@@ -94,19 +157,36 @@ async function startServer() {
       const { city, weather, days } = req.body;
       const ai = getGeminiClient();
 
-      const prompt = `你是一位旅遊專家。請針對前往「${city}」、天氣「${weather}」、停留「${days}」天的一趟旅行，列出建議攜帶的 10-15 個行李項目。
-      請務必包含：必備文件、建議衣物、電子產品、個人藥品/生活用品。
-      請以繁體中文回答，並以 JSON 陣列格式回傳，格式如下：[{"text": "項目名稱", "category": "分類名稱"}] (分類預計有：必備、衣物、電子、生活、其他)`;
+      const prompt = `你是一位旅遊達人。請針對前往「${city}」、天氣「${weather}」、停留「${days}」天的旅行，精挑細選 10-12 個實用必備的行李項目。
+      請涵蓋：必備文件、建議衣物、電子產品、個人生活用品。請以繁體中文回答，極簡精粹！`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: { responseMimeType: "application/json" }
+      const responseText = await retryWithBackoff(async () => {
+        const response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: { 
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  text: { type: Type.STRING, description: "行李項目名稱，例如：護照、防曬乳" },
+                  category: { type: Type.STRING, description: "分類標籤（分類如下：必備、衣物、電子、生活、其他）" }
+                },
+                required: ["text", "category"]
+              }
+            },
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
+          }
+        });
+        return response.text || '[]';
       });
 
-      res.json(JSON.parse(response.text || '[]'));
+      res.json(parseJSONRobust(responseText));
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      console.error('[Server] AI Packing Error:', e);
+      res.status(500).json({ error: e.message || 'AI 獲取行李建議失敗' });
     }
   });
 
@@ -116,37 +196,76 @@ async function startServer() {
       const { city } = req.body;
       const ai = getGeminiClient();
 
-      const prompt = `你是一位深具「文青、在地探索、不走馬看花」美學眼光的獨立旅行家與旅遊作家。請為「${city}」這個地方/城市/國家深度量身打造一份專屬的「在地靈感指南」。
+      const prompt = `你是一位深具文青品味的旅行作家。請為「${city}」訂製一份精緻文青的「在地生活隨筆」。
       
-      請依循以下的核心精神：
-      1. 文青與在地探索風格：文筆具有溫度與質感，描述時能點出物件背後的故事、溫度、文化本質或街角的職人精神，避免流於俗套與商業化的大眾觀光標籤。
-      2. 深入地方脈絡：挖掘唯有深度漫步者、當地人才知道的隱藏美味、歷史工藝或低調迷人的小眾角落（例如獨立書店、深夜咖啡、小農職人坊、未經人工雕琢的自然祕境或社區聚落）。
-      3. 精準圖文相符（極重要）：為了確保前端搭配 Google 圖片搜尋及 Unsplash 圖片時「圖文完全相符」，在產出 "keyword" 時必須使用「精準、具象、高視覺特徵、能在英文搜尋中 100% 正確匹配」的字詞組合。切忌使用籠統字眼（如 "food"、"market"、"beautiful"），應使用具備該地名與具體事物特徵的組合，如 "honduras baleada street food", "honduras copan ruins stela"。
+      規範精神：
+      1. 充滿在地文青溫度，故事敘述文字唯美，但為了提高展示速度，每個項目的介紹說明請嚴格限制在 40 字內，用最凝鍊的筆法吸引讀者！
+      2. 美食 keyword 必須用具體英文方便圖片搜尋，如 "kyoto gyoza", "paris croissant"。
       
-      請包含：
-      1. 該城市/地方的英文名稱 (例如台北為 Taipei、京都為 Kyoto、宏都拉斯為 Honduras 等)。
-      2. 必吃在地美食 (3個)：名稱、一段簡短文青誘人的故事性描述、該食物精準的英文關鍵字（格式為: "地點+具體食物名"，例如 "honduras baleadas"）。
-      3. 特色在地代表物/紀念品 (2個)：名稱、兼具深度與文青感的推薦理由、該項目精準的英文關鍵字（格式為: "地點+具體事物名"，例如 "honduras clay pottery" 或 "honduras lenca textile"）。
-      4. 慢活秘境/私房景點 (2個)：名稱、為什麼它是秘境/故事/文化價值、漫步旅行小撇步、該景點精準的英文關鍵字（格式為: "地點+具體景點名"，例如 "copan ruins archaeological site" 或 "pulhapanzak waterfall honduras"）。
-      
-      請以繁體中文回答，並以 JSON 格式回傳，格式如下：
-      {
-        "city_en": "英文城市名稱",
-        "food": [{"name": "名稱", "desc": "描述", "keyword": "english_keyword"}, ...],
-        "souvenir": [{"name": "名稱", "reason": "理由", "keyword": "english_keyword"}, ...],
-        "spots": [{"name": "名稱", "reason": "為何是秘境", "tip": "小撇步", "keyword": "english_keyword"}, ...]
-      }`;
+      包含：
+      1. 英文地名。
+      2. 3種必吃在地美食。
+      3. 2種文青工藝紀念品。
+      4. 2個慢活私房景點。`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
-        contents: prompt,
-        config: { responseMimeType: "application/json" }
+      const responseText = await retryWithBackoff(async () => {
+        const response = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: prompt,
+          config: { 
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                city_en: { type: Type.STRING, description: "英文城市名稱，例如: Tokyo" },
+                food: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      name: { type: Type.STRING, description: "美食名" },
+                      desc: { type: Type.STRING, description: "文青感描述，必小於40字" },
+                      keyword: { type: Type.STRING, description: "地名+具體食物，英文，如: kyoto matcha toast" }
+                    },
+                    required: ["name", "desc", "keyword"]
+                  }
+                },
+                souvenir: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      name: { type: Type.STRING, description: "在地代表物/紀念品" },
+                      reason: { type: Type.STRING, description: "推薦理由，必小於40字" },
+                      keyword: { type: Type.STRING, description: "地名+具體物件，英文，如: kyoto fan" }
+                    },
+                    required: ["name", "reason", "keyword"]
+                  }
+                },
+                spots: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      name: { type: Type.STRING, description: "秘境景點" },
+                      reason: { type: Type.STRING, description: "為何是秘境，必小於40字" },
+                      tip: { type: Type.STRING, description: "慢活玩法，必小於40字" },
+                      keyword: { type: Type.STRING, description: "地名+具體景點，英文，如: arashiyama bamboo forest" }
+                    },
+                    required: ["name", "reason", "tip", "keyword"]
+                  }
+                }
+              },
+              required: ["city_en", "food", "souvenir", "spots"]
+            },
+            thinkingConfig: { thinkingLevel: ThinkingLevel.LOW }
+          }
+        });
+        return response.text || '{}';
       });
 
-      const responseText = response.text || '{}';
-      console.log('[Server] AI Vibes raw response:', responseText.substring(0, 500) + (responseText.length > 500 ? '...' : ''));
-      
-      res.json(JSON.parse(responseText));
+      console.log('[Server] AI Vibes successful (Optimized)');
+      res.json(parseJSONRobust(responseText));
     } catch (e: any) {
       console.error('[Server] AI Vibes Route Error:', e);
       res.status(500).json({ error: e.message || 'AI 獲取靈感失敗' });
